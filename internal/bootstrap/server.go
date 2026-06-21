@@ -1,0 +1,103 @@
+package bootstrap
+
+import (
+	"context"
+	"errors"
+	"net"
+
+	"github.com/bytedance/sonic"
+	"github.com/gofiber/fiber/v3"
+	"github.com/rizalarfiyan/be-plant-factory/internal/config"
+	httpError "github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/error"
+	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/middleware"
+	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/route"
+	"github.com/rizalarfiyan/be-plant-factory/internal/infrastructure/logger"
+	"github.com/rizalarfiyan/be-plant-factory/internal/infrastructure/validator"
+	"github.com/rizalarfiyan/be-plant-factory/internal/shared/constant"
+	"github.com/rs/zerolog"
+	"github.com/samber/do/v2"
+)
+
+type Server struct {
+	app   *fiber.App
+	conf  *config.Config
+	log   zerolog.Logger
+	mid   middleware.Middleware
+	route route.Router
+}
+
+func NewServer(i do.Injector) (*Server, error) {
+	conf := do.MustInvoke[*config.Config](i)
+	rawLog := do.MustInvoke[*zerolog.Logger](i)
+	mid := do.MustInvoke[middleware.Middleware](i)
+	route := do.MustInvoke[route.Router](i)
+	validate := do.MustInvoke[*validator.Validate](i)
+
+	log := logger.WithLayer(rawLog, logger.LayerHttp)
+
+	log.Info().Msg("Initializing http server")
+
+	validate.Register()
+
+	if err := validate.CustomValidation(); err != nil {
+		log.Error().Err(err).Msg("Failed to register custom validation")
+		return nil, err
+	}
+
+	app := fiber.New(fiber.Config{
+		AppName:             conf.App.Name,
+		BodyLimit:           conf.Fiber.BodyLimit,
+		ErrorHandler:        httpError.Handle,
+		JSONEncoder:         sonic.Marshal,
+		JSONDecoder:         sonic.Unmarshal,
+		StructValidator:     validate,
+		PassLocalsToContext: true,
+		TrustProxyConfig: fiber.TrustProxyConfig{
+			Proxies: conf.Fiber.TrustedProxies,
+		},
+	})
+
+	// TODO: check later, the code is changes memory leak or not
+	app.State().Set(constant.AppStateValidatorKey, validate.Validator())
+
+	log.Info().Msg("Registering http server middleware")
+	mid.Register(app)
+
+	log.Info().Msg("Registering http server routes")
+	route.Register(app)
+
+	return &Server{
+		conf:  conf,
+		log:   log,
+		mid:   mid,
+		route: route,
+		app:   app,
+	}, nil
+}
+
+func (s *Server) Start() (err error) {
+	s.app.Server().ReadTimeout = s.conf.HTTP.ReadTimeout
+	s.app.Server().WriteTimeout = s.conf.HTTP.WriteTimeout
+	s.app.Server().IdleTimeout = s.conf.HTTP.IdleTimeout
+
+	go func() {
+		s.log.Info().Str("address", s.conf.HTTP.AddressWithScheme()).Msg("starting http server")
+
+		config := fiber.ListenConfig{
+			EnablePrefork:         s.conf.Fiber.Prefork,
+			DisableStartupMessage: s.conf.App.Env.IsServerEnv(),
+			ShutdownTimeout:       s.conf.HTTP.ShutdownTimeout,
+		}
+
+		if err := s.app.Listen(s.conf.HTTP.Address(), config); err != nil && !errors.Is(err, net.ErrClosed) {
+			panic(err)
+		}
+	}()
+
+	return nil
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	s.log.Info().Msg("Stopping http server")
+	return s.app.ShutdownWithContext(ctx)
+}

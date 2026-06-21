@@ -1,0 +1,110 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is an API documentation of BE Plant Factory.",
+        "title": "BE Plant Factory API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/",
+    "paths": {
+        "/health": {
+            "get": {
+                "description": "Check Health of the application",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Check Health",
+                "operationId": "check-health",
+                "responses": {
+                    "200": {
+                        "description": "Health check successful. Available code (SUCCESS)",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BaseSwaggerResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.HealthResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "response.BaseSwaggerResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "$ref": "#/definitions/response.MessageSwaggerResponse"
+                }
+            }
+        },
+        "response.HealthResponse": {
+            "type": "object",
+            "properties": {
+                "environment": {
+                    "type": "string",
+                    "example": "production"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "BE Plant Factory"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2026-01-01T00:00:00Z"
+                }
+            }
+        },
+        "response.MessageSwaggerResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "APP_CODE"
+                },
+                "params": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "key": "value"
+                    }
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "CookieAccessToken": {
+            "type": "apiKey",
+            "name": "access_token",
+            "in": "cookie"
+        },
+        "CookieRefreshToken": {
+            "type": "apiKey",
+            "name": "refresh_token",
+            "in": "cookie"
+        }
+    }
+}

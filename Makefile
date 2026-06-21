@@ -63,7 +63,7 @@ dev/install:
 check/deadcode:
 	deadcode ./...
 
-## migrate/create: create a new migration (usage: make migrate/create name=create_users)
+## migrate/create: create a new migration (example = 'make migrate/create name=create_users')
 migrate/create:
 	@test -n "$(name)" || (echo "usage: make migrate/create name=create_users" && exit 1)
 	tern new --migrations migrations $(name)

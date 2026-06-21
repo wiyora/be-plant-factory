@@ -1,0 +1,72 @@
+basePath: /
+definitions:
+  response.BaseSwaggerResponse:
+    properties:
+      data: {}
+      message:
+        $ref: '#/definitions/response.MessageSwaggerResponse'
+    type: object
+  response.HealthResponse:
+    properties:
+      environment:
+        example: production
+        type: string
+      name:
+        example: BE Plant Factory
+        type: string
+      status:
+        example: ok
+        type: string
+      timestamp:
+        example: "2026-01-01T00:00:00Z"
+        type: string
+    type: object
+  response.MessageSwaggerResponse:
+    properties:
+      code:
+        example: APP_CODE
+        type: string
+      params:
+        additionalProperties:
+          type: string
+        example:
+          key: value
+        type: object
+    type: object
+info:
+  contact: {}
+  description: This is an API documentation of BE Plant Factory.
+  title: BE Plant Factory API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check Health of the application
+      operationId: check-health
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Health check successful. Available code (SUCCESS)
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseSwaggerResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.HealthResponse'
+              type: object
+      summary: Check Health
+      tags:
+      - Health
+securityDefinitions:
+  CookieAccessToken:
+    in: cookie
+    name: access_token
+    type: apiKey
+  CookieRefreshToken:
+    in: cookie
+    name: refresh_token
+    type: apiKey
+swagger: "2.0"
