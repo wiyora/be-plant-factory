@@ -3,6 +3,7 @@ package route
 import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/handler"
+	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/middleware"
 	"github.com/samber/do/v2"
 )
 
@@ -11,7 +12,10 @@ type Router interface {
 }
 
 type router struct {
+	mid    middleware.Middleware `do:""`
 	health handler.HealthHandler `do:""`
+	auth   handler.AuthHandler   `do:""`
+	userMe handler.UserMeHandler `do:""`
 }
 
 func New(i do.Injector) (Router, error) {
@@ -20,4 +24,21 @@ func New(i do.Injector) (Router, error) {
 
 func (r *router) Register(app *fiber.App) {
 	app.Get("/health", r.health.Check)
+
+	r.authRoute(app.Group("/auth"))
+	r.userMeRoute(app.Group("/user/me"))
+}
+
+func (r *router) authRoute(route fiber.Router) {
+	// TODO: add rate limiter for refresh token
+	route.Post("/refresh", r.auth.RefreshToken)
+	route.Get("/google", r.auth.GoogleLogin)
+	route.Get("/google/callback", r.auth.GoogleCallback)
+
+	route.Get("/me", r.mid.Auth(), r.auth.Me)
+	route.Post("/logout", r.mid.Auth(), r.auth.Logout)
+}
+
+func (r *router) userMeRoute(route fiber.Router) {
+	route.Post("/getting-started", r.mid.Auth(), r.userMe.GettingStarted)
 }

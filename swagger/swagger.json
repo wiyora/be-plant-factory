@@ -8,6 +8,237 @@
     },
     "basePath": "/",
     "paths": {
+        "/auth/google": {
+            "get": {
+                "description": "Google Login of the application",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Google Login",
+                "operationId": "google-login",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "URL to redirect to after successful login (optional, overrides default success redirect URL)",
+                        "name": "redirect_url",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Google login URL retrieved successfully, Available code (SUCCESS)",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BaseSwaggerResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.AuthGoogleLoginResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid redirect URL provided. Available code (INVALID_REDIRECT_URL)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve Google login URL. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/google/callback": {
+            "get": {
+                "description": "Google Callback for the application",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Google Callback",
+                "operationId": "google-callback",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization code from Google",
+                        "name": "code",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "State parameter for CSRF protection",
+                        "name": "state",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirects to the failure URL with error code as query parameter. Available code (INTERNAL_SERVER_ERROR, INVALID_STATE, PROVIDER_ERROR, TOKEN_EXCHANGE_FAILED, INVALID_CALLBACK, FAILED_CALLBACK)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Logout the currently authenticated user by invalidating their session and tokens",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout",
+                "operationId": "logout",
+                "responses": {
+                    "200": {
+                        "description": "User logged out successfully. Available code (SUCCESS)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - user is not authenticated. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Get the currently authenticated user's information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get Current User",
+                "operationId": "get-current-user",
+                "responses": {
+                    "200": {
+                        "description": "Current user retrieved successfully. Available code (SUCCESS)",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BaseSwaggerResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.AuthMeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - user is not authenticated. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "security": [
+                    {
+                        "CookieRefreshToken": []
+                    }
+                ],
+                "description": "Refresh the access token using a valid refresh token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refresh Access Token",
+                "operationId": "refresh-access-token",
+                "responses": {
+                    "200": {
+                        "description": "Access token refreshed successfully. Available code (SUCCESS)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or expired refresh token. Available code (UNAUTHORIZED, INVALID_REFRESH_TOKEN, REFRESH_TOKEN_NOT_ELIGIBLE[remaining_seconds])",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Check Health of the application",
@@ -43,15 +274,171 @@
                     }
                 }
             }
+        },
+        "/user/me/getting-started": {
+            "post": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Complete the getting started process for the user. Validation:\nname = REQUIRED, ALPHASPACE, MIN 3, MAX 64\navatar = REQUIRED, STARTSWITH \"avatar:\"",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "UserMe"
+                ],
+                "summary": "Getting Started",
+                "operationId": "user-me-getting-started",
+                "parameters": [
+                    {
+                        "description": "Getting Started Payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UserMeGettingStartedRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Getting started process completed successfully. Available code (SUCCESS)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - invalid input data. Available code (VALIDATION_ERROR, BAD_REQUEST)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - user not authenticated. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity - validation failed. Available code (INVALID_CURRENT_STEP)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "entity.CurrentStep": {
+            "type": "string",
+            "enum": [
+                "initial",
+                "completed"
+            ],
+            "x-enum-varnames": [
+                "CurrentStepInitial",
+                "CurrentStepCompleted"
+            ]
+        },
+        "request.UserMeGettingStartedRequest": {
+            "type": "object",
+            "required": [
+                "avatar",
+                "name"
+            ],
+            "properties": {
+                "avatar": {
+                    "type": "string",
+                    "example": "avatar:coding"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 3,
+                    "example": "Rizal Arfiyan"
+                }
+            }
+        },
+        "response.AuthGoogleLoginResponse": {
+            "type": "object",
+            "properties": {
+                "redirect_url": {
+                    "type": "string",
+                    "example": "https://accounts.google.com/o/oauth2/auth/..."
+                }
+            }
+        },
+        "response.AuthMeResponse": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string",
+                    "example": "https://ominotes.com/avatar.jpg"
+                },
+                "current_step": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.CurrentStep"
+                        }
+                    ],
+                    "example": "completed"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "rizalarfiyan@ominotes.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Rizal Arfiyan"
+                }
+            }
+        },
+        "response.BaseSwaggerEmptyResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "x-nullable": true,
+                    "example": "null"
+                },
+                "message": {
+                    "$ref": "#/definitions/response.MessageSwaggerResponse"
+                }
+            }
+        },
         "response.BaseSwaggerResponse": {
             "type": "object",
             "properties": {
                 "data": {},
                 "message": {
                     "$ref": "#/definitions/response.MessageSwaggerResponse"
+                }
+            }
+        },
+        "response.BaseSwaggerValidationResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "x-nullable": true,
+                    "example": "null"
+                },
+                "message": {
+                    "$ref": "#/definitions/response.MessageSwaggerValidationResponse"
                 }
             }
         },
@@ -82,6 +469,39 @@
                 "code": {
                     "type": "string",
                     "example": "APP_CODE"
+                },
+                "params": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "key": "value"
+                    }
+                }
+            }
+        },
+        "response.MessageSwaggerValidationResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "VALIDATION_ERROR"
+                },
+                "fields": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/response.ValidationErrorFieldSwaggerResponse"
+                    }
+                }
+            }
+        },
+        "response.ValidationErrorFieldSwaggerResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "VALIDATION_CODE"
                 },
                 "params": {
                     "type": "object",

@@ -1,9 +1,13 @@
+CREATE TYPE user_current_step AS ENUM ('initial', 'completed');
+
 CREATE TABLE users (
 	id UUID PRIMARY KEY DEFAULT uuidv7(),
 	email VARCHAR(255) UNIQUE NOT NULL,
-	google_id VARCHAR(32) UNIQUE NOT NULL,
 	name VARCHAR(64),
+    avatar VARCHAR(32) NOT NULL DEFAULT '',
+    current_step user_current_step NOT NULL DEFAULT 'initial',
 	is_super_admin BOOLEAN DEFAULT FALSE NOT NULL,
+    last_logged_in_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ
 );
@@ -26,3 +30,4 @@ CREATE INDEX idx_sessions_refresh_hash ON sessions (refresh_token_hash);
 DROP INDEX IF EXISTS idx_sessions_refresh_hash;
 DROP TABLE IF EXISTS sessions;
 DROP TABLE IF EXISTS users;
+DROP TYPE IF EXISTS user_current_step;

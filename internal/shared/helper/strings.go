@@ -5,6 +5,18 @@ import (
 	"unicode"
 )
 
+func TruncateString(str string, maxLength int, suffix string) string {
+	if len(str) <= maxLength {
+		return str
+	}
+
+	if maxLength <= len(suffix) {
+		return suffix
+	}
+
+	return str[:maxLength-len(suffix)] + suffix
+}
+
 func ToSnakeCase(s string) string {
 	var b strings.Builder
 	b.Grow(len(s) + 2)

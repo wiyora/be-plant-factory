@@ -58,7 +58,13 @@ func (m *middleware) Register(app *fiber.App) {
 
 			logCtx = logCtx.Str("layer", string(logger.LayerHttp))
 
-			// TODO: add auth user id to log context
+			if user, ok := helper.GetLocalUser(c); ok {
+				logCtx = logCtx.Str("user_id", user.ID.String())
+			}
+
+			if sessionID, ok := helper.GetLocalSessionID(c); ok {
+				logCtx = logCtx.Str("session_id", sessionID.String())
+			}
 
 			return logCtx.Logger()
 		},

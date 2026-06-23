@@ -7,7 +7,7 @@ import (
 
 type AppConfig struct {
 	Env  AppEnv `env:"ENV" validate:"required,oneof=development staging production" default:"development"`
-	Name string `env:"NAME" validate:"required" default:"Ominotes"`
+	Name string `env:"NAME" validate:"required" default:"Plant Factory"`
 }
 
 type AppEnv string

@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"github.com/rizalarfiyan/be-plant-factory/internal/repository/cache"
 	"github.com/rizalarfiyan/be-plant-factory/internal/repository/postgres"
+	"github.com/rizalarfiyan/be-plant-factory/internal/repository/redis"
 	"github.com/samber/do/v2"
 )
 
@@ -10,8 +12,14 @@ var Package = do.Package(
 	do.Lazy(postgres.NewTransactionManager),
 
 	// Postgres repositories
+	do.Lazy(postgres.NewUserRepository),
+	do.Lazy(postgres.NewSessionRepository),
 
 	// Redis repositories
+	do.Lazy(redis.NewCacheRepository),
+	do.Lazy(redis.NewTokenRepository),
+	do.Lazy(redis.NewStateRepository),
 
 	// Cache repositories
+	do.Lazy(cache.NewUserRepository),
 )
