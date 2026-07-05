@@ -96,7 +96,7 @@
                 ],
                 "responses": {
                     "302": {
-                        "description": "Redirects to the failure URL with error code as query parameter. Available code (INTERNAL_SERVER_ERROR, INVALID_STATE, PROVIDER_ERROR, TOKEN_EXCHANGE_FAILED, INVALID_CALLBACK, FAILED_CALLBACK)",
+                        "description": "Redirects to the failure URL with error code as query parameter. Available code (INTERNAL_SERVER_ERROR, INVALID_STATE, PROVIDER_ERROR, TOKEN_EXCHANGE_FAILED, INVALID_CALLBACK, FAILED_CALLBACK, USER_STATUS_INACTIVE, USER_STATUS_BANNED)",
                         "schema": {
                             "type": "string"
                         }

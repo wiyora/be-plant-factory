@@ -89,7 +89,7 @@ func (h authHandler) GoogleLogin(c fiber.Ctx) error {
 //	@Param			code	query		string	true	"Authorization code from Google"
 //	@Param			state	query		string	true	"State parameter for CSRF protection"
 //	@Success		302		{string}	string	"Redirects to the success URL with authentication cookies set"
-//	@Failure		302		{string}	string	"Redirects to the failure URL with error code as query parameter. Available code (INTERNAL_SERVER_ERROR, INVALID_STATE, PROVIDER_ERROR, TOKEN_EXCHANGE_FAILED, INVALID_CALLBACK, FAILED_CALLBACK)"
+//	@Failure		302		{string}	string	"Redirects to the failure URL with error code as query parameter. Available code (INTERNAL_SERVER_ERROR, INVALID_STATE, PROVIDER_ERROR, TOKEN_EXCHANGE_FAILED, INVALID_CALLBACK, FAILED_CALLBACK, USER_STATUS_INACTIVE, USER_STATUS_BANNED)"
 //	@Router			/auth/google/callback [get]
 func (h authHandler) GoogleCallback(c fiber.Ctx) error {
 	authCode := c.Query("code")

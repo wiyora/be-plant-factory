@@ -50,17 +50,27 @@ func (r userRepository) UpsertSocialUser(ctx context.Context, user entity.User) 
 	VALUES ($1, $2, $3, $4)
 	ON CONFLICT (email) DO UPDATE
 	SET last_logged_in_at = NOW()
-	RETURNING id, current_step`
+	RETURNING id, current_step, status`
 
 	db := GetDB(ctx, r.db)
-	row := db.QueryRow(ctx, query, user.Email, user.Name, user.Avatar, user.CurrentStep)
-	var result UpsertSocialUser
-	if err := row.Scan(&result.ID, &result.CurrentStep); err != nil {
-		log.Error().Err(err).Msg("failed to execute query")
+	rows, err := db.Query(ctx, query, user.Email, user.Name, user.Avatar, user.CurrentStep)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to execute get by id query")
+		return UpsertSocialUser{}, err
+	}
+	defer rows.Close()
+
+	item, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[UpsertSocialUser])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return UpsertSocialUser{}, nil
+		}
+
+		log.Error().Err(err).Msg("failed to execute collect one row")
 		return UpsertSocialUser{}, err
 	}
 
-	return result, nil
+	return item, nil
 }
 
 func (r userRepository) GetById(ctx context.Context, id uuid.UUID) (User, error) {

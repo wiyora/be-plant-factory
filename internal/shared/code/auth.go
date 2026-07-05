@@ -12,5 +12,7 @@ var (
 	RefreshTokenNotEligible = AppCode{"REFRESH_TOKEN_NOT_ELIGIBLE", fiber.StatusUnauthorized}
 	InvalidRedirectURL      = AppCode{"INVALID_REDIRECT_URL", fiber.StatusBadRequest}
 	UserNotFound            = AppCode{"USER_NOT_FOUND", fiber.StatusUnprocessableEntity}
+	UserStatusInactive      = AppCode{"USER_STATUS_INACTIVE", fiber.StatusUnauthorized}
+	UserStatusBanned        = AppCode{"USER_STATUS_BANNED", fiber.StatusUnauthorized}
 	InvalidCurrentStep      = AppCode{"INVALID_CURRENT_STEP", fiber.StatusUnprocessableEntity}
 )

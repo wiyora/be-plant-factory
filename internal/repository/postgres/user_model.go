@@ -56,4 +56,5 @@ func (u ListUser) ToEntity() entity.User {
 type UpsertSocialUser struct {
 	ID          uuid.UUID          `db:"id"`
 	CurrentStep entity.CurrentStep `db:"current_step"`
+	Status      entity.UserStatus  `db:"status"`
 }

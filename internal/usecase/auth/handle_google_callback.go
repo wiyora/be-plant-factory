@@ -49,6 +49,14 @@ func (u authUseCase) HandleGoogleCallback(ctx context.Context, req CallbackReque
 		return res, err
 	}
 
+	if user.Status == entity.UserStatusInactive {
+		return res, domainError.New(code.UserStatusInactive)
+	}
+
+	if user.Status == entity.UserStatusBanned {
+		return res, domainError.New(code.UserStatusBanned)
+	}
+
 	if user.CurrentStep == entity.CurrentStepCompleted {
 		res.IsCompleted = true
 	}
