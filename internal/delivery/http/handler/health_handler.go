@@ -29,6 +29,7 @@ func NewHealthHandler(i do.Injector) (HealthHandler, error) {
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{object}	response.BaseSwaggerResponse{data=response.HealthResponse}	"Health check successful. Available code (SUCCESS)"
+//	@Failure		500	{object}	response.BaseSwaggerEmptyResponse{}							"Internal Server Error. Available code (INTERNAL_SERVER_ERROR)"
 //	@Router			/health [get]
 func (h healthHandler) Check(c fiber.Ctx) error {
 	res := response.NewHealthResponse(h.health.Check())

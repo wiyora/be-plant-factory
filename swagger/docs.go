@@ -40,7 +40,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Google login URL retrieved successfully, Available code (SUCCESS)",
+                        "description": "Google login URL retrieved successfully. Available code (SUCCESS)",
                         "schema": {
                             "allOf": [
                                 {
@@ -197,6 +197,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
                     },
+                    "422": {
+                        "description": "User not found. Available code (USER_NOT_FOUND)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
                         "schema": {
@@ -279,6 +285,12 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
                     }
                 }
             }
@@ -358,7 +370,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Users fetched successfully",
+                        "description": "Users fetched successfully. Available code (LIST_FETCHED)",
                         "schema": {
                             "allOf": [
                                 {
@@ -379,19 +391,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
@@ -404,7 +416,7 @@ const docTemplate = `{
                         "CookieAccessToken": []
                     }
                 ],
-                "description": "Create a new user",
+                "description": "Create a new user. Validation: email REQUIRED, EMAIL, MAX 255; name REQUIRED, ALPHASPACE, MIN 3, MAX 64; avatar REQUIRED, STARTSWITH \"avatar:\"",
                 "consumes": [
                     "application/json"
                 ],
@@ -429,25 +441,25 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "User created successfully",
+                        "description": "User created successfully. Available code (CREATED)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad Request - invalid input data",
+                        "description": "Bad Request - invalid input data. Available code (VALIDATION_ERROR, BAD_REQUEST)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
@@ -546,7 +558,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "User detail fetched successfully",
+                        "description": "User detail fetched successfully. Available code (DETAIL_FETCHED)",
                         "schema": {
                             "allOf": [
                                 {
@@ -564,25 +576,25 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request - invalid ID",
+                        "description": "Bad Request - invalid ID. Available code (INVALID_PARAM_ID)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
                     },
                     "422": {
-                        "description": "User not found",
+                        "description": "User not found. Available code (USER_NOT_FOUND)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
@@ -595,7 +607,7 @@ const docTemplate = `{
                         "CookieAccessToken": []
                     }
                 ],
-                "description": "Update user name and avatar",
+                "description": "Update user name and avatar. Validation: name REQUIRED, ALPHASPACE, MIN 3, MAX 64; avatar REQUIRED, STARTSWITH \"avatar:\"",
                 "consumes": [
                     "application/json"
                 ],
@@ -627,25 +639,25 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "User updated successfully",
+                        "description": "User updated successfully. Available code (UPDATED)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad Request - invalid input data",
+                        "description": "Bad Request - invalid input data. Available code (VALIDATION_ERROR, BAD_REQUEST)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
@@ -660,7 +672,7 @@ const docTemplate = `{
                         "CookieAccessToken": []
                     }
                 ],
-                "description": "Update user status (active, inactive, banned)",
+                "description": "Update user status (active, inactive, banned). Validation: status must be one of active, inactive, banned",
                 "produces": [
                     "application/json"
                 ],
@@ -692,25 +704,31 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "User status updated successfully",
+                        "description": "User status updated successfully. Available code (UPDATED)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad Request - invalid status",
+                        "description": "Bad Request - invalid status. Available code (INVALID_PATH, VALIDATION_ERROR)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "User has same status. Available code (USER_HAS_SAME_STATUS)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }

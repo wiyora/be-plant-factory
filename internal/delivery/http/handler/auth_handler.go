@@ -43,9 +43,9 @@ func NewAuthHandler(i do.Injector) (AuthHandler, error) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			redirect_url	query		string																false	"URL to redirect to after successful login (optional, overrides default success redirect URL)"
-//	@Success		200				{object}	response.BaseSwaggerResponse{data=response.AuthGoogleLoginResponse}	"Google login URL retrieved successfully, Available code (SUCCESS)"
-//	@Success		400				{object}	response.BaseSwaggerEmptyResponse{}									"Invalid redirect URL provided. Available code (INVALID_REDIRECT_URL)"
-//	@Success		500				{object}	response.BaseSwaggerEmptyResponse{}									"Failed to retrieve Google login URL. Available code (INTERNAL_SERVER_ERROR)"
+//	@Success		200				{object}	response.BaseSwaggerResponse{data=response.AuthGoogleLoginResponse}	"Google login URL retrieved successfully. Available code (SUCCESS)"
+//	@Failure		400				{object}	response.BaseSwaggerEmptyResponse{}									"Invalid redirect URL provided. Available code (INVALID_REDIRECT_URL)"
+//	@Failure		500				{object}	response.BaseSwaggerEmptyResponse{}									"Failed to retrieve Google login URL. Available code (INTERNAL_SERVER_ERROR)"
 //	@Router			/auth/google [get]
 func (h authHandler) GoogleLogin(c fiber.Ctx) error {
 	redirectUrl := c.Query("redirect_url")
@@ -184,6 +184,7 @@ func (h authHandler) clearCookies(c fiber.Ctx) {
 //	@Security		CookieAccessToken
 //	@Success		200	{object}	response.BaseSwaggerResponse{data=response.AuthMeResponse}	"Current user retrieved successfully. Available code (SUCCESS)"
 //	@Failure		401	{object}	response.BaseSwaggerEmptyResponse{}							"Unauthorized - user is not authenticated. Available code (UNAUTHORIZED)"
+//	@Failure		422	{object}	response.BaseSwaggerEmptyResponse{}							"User not found. Available code (USER_NOT_FOUND)"
 //	@Failure		500	{object}	response.BaseSwaggerEmptyResponse{}							"Internal Server Error. Available code (INTERNAL_SERVER_ERROR)"
 //	@Router			/auth/me [get]
 func (h authHandler) Me(c fiber.Ctx) error {

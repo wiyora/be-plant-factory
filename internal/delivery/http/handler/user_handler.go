@@ -46,10 +46,10 @@ func NewUserHandler(i do.Injector) (UserHandler, error) {
 //	@Param			order_by	query		string																		false	"Order by field"	default(id)		enums(id, created_at, name, email)
 //	@Param			sort_by		query		string																		false	"Sort direction"	default(desc)	enums(asc, desc)
 //	@Param			status		query		string																		false	"Filter by status"	enums(active, inactive, banned)
-//	@Success		200			{object}	response.BasePaginationSwaggerResponse{data=[]response.ListUserResponse}	"Users fetched successfully"
-//	@Failure		400			{object}	response.BaseSwaggerValidationResponse{}									"Bad Request"
-//	@Failure		401			{object}	response.BaseSwaggerEmptyResponse{}											"Unauthorized"
-//	@Failure		500			{object}	response.BaseSwaggerEmptyResponse{}											"Internal Server Error"
+//	@Success		200			{object}	response.BasePaginationSwaggerResponse{data=[]response.ListUserResponse}	"Users fetched successfully. Available code (LIST_FETCHED)"
+//	@Failure		400			{object}	response.BaseSwaggerValidationResponse{}									"Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)"
+//	@Failure		401			{object}	response.BaseSwaggerEmptyResponse{}											"Unauthorized. Available code (UNAUTHORIZED)"
+//	@Failure		500			{object}	response.BaseSwaggerEmptyResponse{}											"Internal Server Error. Available code (INTERNAL_SERVER_ERROR)"
 //	@Router			/user [get]
 func (h userHandler) List(c fiber.Ctx) error {
 	var req entity.UserFilter
@@ -96,11 +96,11 @@ func (h userHandler) List(c fiber.Ctx) error {
 //	@Produce		json
 //	@Security		CookieAccessToken
 //	@Param			id	path		string															true	"User ID"
-//	@Success		200	{object}	response.BaseSwaggerResponse{data=response.DetailUserResponse}	"User detail fetched successfully"
-//	@Failure		400	{object}	response.BaseSwaggerEmptyResponse{}								"Bad Request - invalid ID"
-//	@Failure		401	{object}	response.BaseSwaggerEmptyResponse{}								"Unauthorized"
-//	@Failure		422	{object}	response.BaseSwaggerEmptyResponse{}								"User not found"
-//	@Failure		500	{object}	response.BaseSwaggerEmptyResponse{}								"Internal Server Error"
+//	@Success		200	{object}	response.BaseSwaggerResponse{data=response.DetailUserResponse}	"User detail fetched successfully. Available code (DETAIL_FETCHED)"
+//	@Failure		400	{object}	response.BaseSwaggerEmptyResponse{}								"Bad Request - invalid ID. Available code (INVALID_PARAM_ID)"
+//	@Failure		401	{object}	response.BaseSwaggerEmptyResponse{}								"Unauthorized. Available code (UNAUTHORIZED)"
+//	@Failure		422	{object}	response.BaseSwaggerEmptyResponse{}								"User not found. Available code (USER_NOT_FOUND)"
+//	@Failure		500	{object}	response.BaseSwaggerEmptyResponse{}								"Internal Server Error. Available code (INTERNAL_SERVER_ERROR)"
 //	@Router			/user/{id} [get]
 func (h userHandler) Detail(c fiber.Ctx) error {
 	id, err := request.GetParamID(c, "id")
@@ -119,17 +119,17 @@ func (h userHandler) Detail(c fiber.Ctx) error {
 // Create godoc
 //
 //	@Summary		Create User
-//	@Description	Create a new user
+//	@Description	Create a new user. Validation: email REQUIRED, EMAIL, MAX 255; name REQUIRED, ALPHASPACE, MIN 3, MAX 64; avatar REQUIRED, STARTSWITH "avatar:"
 //	@ID				user-create
 //	@Tags			User
 //	@Accept			json
 //	@Produce		json
 //	@Security		CookieAccessToken
 //	@Param			payload	body		request.CreateUserRequest					true	"Create User Payload"
-//	@Success		201		{object}	response.BaseSwaggerEmptyResponse{}			"User created successfully"
-//	@Failure		400		{object}	response.BaseSwaggerValidationResponse{}	"Bad Request - invalid input data"
-//	@Failure		401		{object}	response.BaseSwaggerEmptyResponse{}			"Unauthorized"
-//	@Failure		500		{object}	response.BaseSwaggerEmptyResponse{}			"Internal Server Error"
+//	@Success		201		{object}	response.BaseSwaggerEmptyResponse{}			"User created successfully. Available code (CREATED)"
+//	@Failure		400		{object}	response.BaseSwaggerValidationResponse{}	"Bad Request - invalid input data. Available code (VALIDATION_ERROR, BAD_REQUEST)"
+//	@Failure		401		{object}	response.BaseSwaggerEmptyResponse{}			"Unauthorized. Available code (UNAUTHORIZED)"
+//	@Failure		500		{object}	response.BaseSwaggerEmptyResponse{}			"Internal Server Error. Available code (INTERNAL_SERVER_ERROR)"
 //	@Router			/user [post]
 func (h userHandler) Create(c fiber.Ctx) error {
 	payload, err := helper.BindJSON[request.CreateUserRequest](c)
@@ -148,7 +148,7 @@ func (h userHandler) Create(c fiber.Ctx) error {
 // Update godoc
 //
 //	@Summary		Update User
-//	@Description	Update user name and avatar
+//	@Description	Update user name and avatar. Validation: name REQUIRED, ALPHASPACE, MIN 3, MAX 64; avatar REQUIRED, STARTSWITH "avatar:"
 //	@ID				user-update
 //	@Tags			User
 //	@Accept			json
@@ -156,10 +156,10 @@ func (h userHandler) Create(c fiber.Ctx) error {
 //	@Security		CookieAccessToken
 //	@Param			id		path		string										true	"User ID"
 //	@Param			payload	body		request.UpdateUserRequest					true	"Update User Payload"
-//	@Success		200		{object}	response.BaseSwaggerEmptyResponse{}			"User updated successfully"
-//	@Failure		400		{object}	response.BaseSwaggerValidationResponse{}	"Bad Request - invalid input data"
-//	@Failure		401		{object}	response.BaseSwaggerEmptyResponse{}			"Unauthorized"
-//	@Failure		500		{object}	response.BaseSwaggerEmptyResponse{}			"Internal Server Error"
+//	@Success		200		{object}	response.BaseSwaggerEmptyResponse{}			"User updated successfully. Available code (UPDATED)"
+//	@Failure		400		{object}	response.BaseSwaggerValidationResponse{}	"Bad Request - invalid input data. Available code (VALIDATION_ERROR, BAD_REQUEST)"
+//	@Failure		401		{object}	response.BaseSwaggerEmptyResponse{}			"Unauthorized. Available code (UNAUTHORIZED)"
+//	@Failure		500		{object}	response.BaseSwaggerEmptyResponse{}			"Internal Server Error. Available code (INTERNAL_SERVER_ERROR)"
 //	@Router			/user/{id} [put]
 func (h userHandler) Update(c fiber.Ctx) error {
 	id, err := request.GetParamID(c, "id")
@@ -184,17 +184,18 @@ func (h userHandler) Update(c fiber.Ctx) error {
 // UpdateStatus godoc
 //
 //	@Summary		Update User Status
-//	@Description	Update user status (active, inactive, banned)
+//	@Description	Update user status (active, inactive, banned). Validation: status must be one of active, inactive, banned
 //	@ID				user-update-status
 //	@Tags			User
 //	@Produce		json
 //	@Security		CookieAccessToken
 //	@Param			id		path		string								true	"User ID"
 //	@Param			status	path		string								true	"Status"	Enums(active, inactive, banned)
-//	@Success		200		{object}	response.BaseSwaggerEmptyResponse{}	"User status updated successfully"
-//	@Failure		400		{object}	response.BaseSwaggerEmptyResponse{}	"Bad Request - invalid status"
-//	@Failure		401		{object}	response.BaseSwaggerEmptyResponse{}	"Unauthorized"
-//	@Failure		500		{object}	response.BaseSwaggerEmptyResponse{}	"Internal Server Error"
+//	@Success		200		{object}	response.BaseSwaggerEmptyResponse{}	"User status updated successfully. Available code (UPDATED)"
+//	@Failure		400		{object}	response.BaseSwaggerEmptyResponse{}	"Bad Request - invalid status. Available code (INVALID_PATH, VALIDATION_ERROR)"
+//	@Failure		401		{object}	response.BaseSwaggerEmptyResponse{}	"Unauthorized. Available code (UNAUTHORIZED)"
+//	@Failure		422		{object}	response.BaseSwaggerEmptyResponse{}	"User has same status. Available code (USER_HAS_SAME_STATUS)"
+//	@Failure		500		{object}	response.BaseSwaggerEmptyResponse{}	"Internal Server Error. Available code (INTERNAL_SERVER_ERROR)"
 //	@Router			/user/{id}/status/{status} [post]
 func (h userHandler) UpdateStatus(c fiber.Ctx) error {
 	id, err := request.GetParamID(c, "id")
