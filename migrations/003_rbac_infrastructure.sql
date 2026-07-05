@@ -5,6 +5,8 @@ CREATE TABLE roles (
 	updated_at TIMESTAMPTZ
 );
 
+CREATE INDEX idx_roles_name_search ON roles USING gin (name gin_trgm_ops);
+
 CREATE TABLE permissions (
 	id UUID PRIMARY KEY DEFAULT uuidv7(),
 	code VARCHAR(32) UNIQUE NOT NULL,

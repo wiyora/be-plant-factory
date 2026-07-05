@@ -30,3 +30,26 @@ func BindJSON[T any](ctx fiber.Ctx) (T, error) {
 
 	return payload, nil
 }
+
+type QueryBinder func(c fiber.Ctx) error
+
+func QueryBind(c fiber.Ctx, binders ...QueryBinder) error {
+	for _, bind := range binders {
+		if err := bind(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func QueryField[T any](target *T, parseFn func(fiber.Ctx) (T, error)) QueryBinder {
+	return func(c fiber.Ctx) error {
+		val, err := parseFn(c)
+		if err != nil {
+			return err
+		}
+
+		*target = val
+		return nil
+	}
+}
