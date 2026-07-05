@@ -16,6 +16,7 @@ type router struct {
 	health handler.HealthHandler `do:""`
 	auth   handler.AuthHandler   `do:""`
 	userMe handler.UserMeHandler `do:""`
+	user   handler.UserHandler   `do:""`
 }
 
 func New(i do.Injector) (Router, error) {
@@ -26,6 +27,7 @@ func (r *router) Register(app *fiber.App) {
 	app.Get("/health", r.health.Check)
 
 	r.authRoute(app.Group("/auth"))
+	r.userRoute(app.Group("/user"))
 	r.userMeRoute(app.Group("/user/me"))
 }
 
@@ -37,6 +39,14 @@ func (r *router) authRoute(route fiber.Router) {
 
 	route.Get("/me", r.mid.Auth(), r.auth.Me)
 	route.Post("/logout", r.mid.Auth(), r.auth.Logout)
+}
+
+func (r *router) userRoute(route fiber.Router) {
+	route.Get("", r.mid.Auth(), r.user.List)
+	route.Get("/:id", r.mid.Auth(), r.user.Detail)
+	route.Post("", r.mid.Auth(), r.user.Create)
+	route.Put("/:id", r.mid.Auth(), r.user.Update)
+	route.Post("/:id/status/:status", r.mid.Auth(), r.user.UpdateStatus)
 }
 
 func (r *router) userMeRoute(route fiber.Router) {

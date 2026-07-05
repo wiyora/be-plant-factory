@@ -12,6 +12,7 @@ var (
 	ValidationError    = AppCode{"VALIDATION_ERROR", fiber.StatusBadRequest}
 	RateLimitExceeded  = AppCode{"RATE_LIMIT_EXCEEDED", fiber.StatusTooManyRequests}
 
+	InvalidPath               = AppCode{"INVALID_PATH", fiber.StatusBadRequest}
 	InvalidPageQuery          = AppCode{"INVALID_PAGE_QUERY", fiber.StatusBadRequest}
 	InvalidLimitQuery         = AppCode{"INVALID_LIMIT_QUERY", fiber.StatusBadRequest}
 	InvalidOrderByQuery       = AppCode{"INVALID_ORDER_BY_QUERY", fiber.StatusBadRequest}

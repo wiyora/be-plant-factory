@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// User Current Step
 type CurrentStep string
 
 const (
@@ -26,6 +27,28 @@ func (s CurrentStep) Valid() bool {
 	}
 }
 
+// User Status
+type UserStatus string
+
+const (
+	UserStatusActive   UserStatus = "active"
+	UserStatusInactive UserStatus = "inactive"
+	UserStatusBanned   UserStatus = "banned"
+)
+
+func (s UserStatus) String() string {
+	return string(s)
+}
+
+func (s UserStatus) Valid() bool {
+	switch s {
+	case UserStatusActive, UserStatusInactive, UserStatusBanned:
+		return true
+	default:
+		return false
+	}
+}
+
 type User struct {
 	ID             uuid.UUID
 	Email          string
@@ -33,7 +56,15 @@ type User struct {
 	Avatar         string
 	IsSuperAdmin   bool
 	CurrentStep    CurrentStep
+	Status         UserStatus
 	LastLoggedInAt time.Time
 	CreatedAt      time.Time
 	UpdatedAt      *time.Time
+}
+
+type UserFilter struct {
+	Search     Search
+	Pagination Pagination
+	Order      Order
+	Status     UserStatus
 }

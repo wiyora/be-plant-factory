@@ -63,7 +63,7 @@ func Parse(opts ...Option) Parser {
 	cfg := config{
 		keyOrderBy:     "order_by",
 		keySortBy:      "sort_by",
-		defaultOrderBy: "created_at",
+		defaultOrderBy: "id",
 		defaultSortBy:  entity.Desc,
 	}
 

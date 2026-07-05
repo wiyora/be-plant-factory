@@ -6,4 +6,5 @@ var Package = do.Package(
 	do.Lazy(NewHealthHandler),
 	do.Lazy(NewAuthHandler),
 	do.Lazy(NewUserMeHandler),
+	do.Lazy(NewUserHandler),
 )

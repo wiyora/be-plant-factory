@@ -275,6 +275,178 @@
                 }
             }
         },
+        "/user": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Get list of users with pagination and search",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "List Users",
+                "operationId": "user-list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search by name (min 3 chars)",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "id",
+                            "created_at",
+                            "name",
+                            "email"
+                        ],
+                        "type": "string",
+                        "default": "id",
+                        "description": "Order by field",
+                        "name": "order_by",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "desc",
+                        "description": "Sort direction",
+                        "name": "sort_by",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "active",
+                            "inactive",
+                            "banned"
+                        ],
+                        "type": "string",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Users fetched successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BasePaginationSwaggerResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.ListUserResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Create a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Create User",
+                "operationId": "user-create",
+                "parameters": [
+                    {
+                        "description": "Create User Payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/user/me/getting-started": {
             "post": {
                 "security": [
@@ -338,6 +510,205 @@
                     }
                 }
             }
+        },
+        "/user/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Get user detail by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get User Detail",
+                "operationId": "user-detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User detail fetched successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BaseSwaggerResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.DetailUserResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Update user name and avatar",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update User",
+                "operationId": "user-update",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update User Payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{id}/status/{status}": {
+            "post": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Update user status (active, inactive, banned)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update User Status",
+                "operationId": "user-update-status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "active",
+                            "inactive",
+                            "banned"
+                        ],
+                        "type": "string",
+                        "description": "Status",
+                        "name": "status",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User status updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - invalid status",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -351,6 +722,63 @@
                 "CurrentStepInitial",
                 "CurrentStepCompleted"
             ]
+        },
+        "entity.UserStatus": {
+            "type": "string",
+            "enum": [
+                "active",
+                "inactive",
+                "banned"
+            ],
+            "x-enum-varnames": [
+                "UserStatusActive",
+                "UserStatusInactive",
+                "UserStatusBanned"
+            ]
+        },
+        "request.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "avatar",
+                "email",
+                "name"
+            ],
+            "properties": {
+                "avatar": {
+                    "type": "string",
+                    "example": "avatar: coding"
+                },
+                "email": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "example": "rizalarfiyan@plant-factory.com"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 3,
+                    "example": "Rizal Arfiyan"
+                }
+            }
+        },
+        "request.UpdateUserRequest": {
+            "type": "object",
+            "required": [
+                "avatar",
+                "name"
+            ],
+            "properties": {
+                "avatar": {
+                    "type": "string",
+                    "example": "avatar: coding"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 3,
+                    "example": "Rizal Arfiyan"
+                }
+            }
         },
         "request.UserMeGettingStartedRequest": {
             "type": "object",
@@ -446,6 +874,18 @@
                 }
             }
         },
+        "response.BasePaginationSwaggerResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "$ref": "#/definitions/response.MessageSwaggerResponse"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/response.PaginationSwaggerResponse"
+                }
+            }
+        },
         "response.BaseSwaggerEmptyResponse": {
             "type": "object",
             "properties": {
@@ -479,6 +919,59 @@
                 }
             }
         },
+        "response.DetailUserResponse": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string",
+                    "example": "avatar: coding"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                },
+                "current_step": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.CurrentStep"
+                        }
+                    ],
+                    "example": "completed"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "rizalarfiyan@plant-factory.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "is_super_admin": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "last_logged_in_at": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Rizal Arfiyan"
+                },
+                "status": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.UserStatus"
+                        }
+                    ],
+                    "example": "active"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                }
+            }
+        },
         "response.HealthResponse": {
             "type": "object",
             "properties": {
@@ -497,6 +990,35 @@
                 "timestamp": {
                     "type": "string",
                     "example": "2026-01-01T00:00:00Z"
+                }
+            }
+        },
+        "response.ListUserResponse": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string",
+                    "example": "avatar: coding"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "rizalarfiyan@plant-factory.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Rizal Arfiyan"
+                },
+                "status": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.UserStatus"
+                        }
+                    ],
+                    "example": "active"
                 }
             }
         },
@@ -530,6 +1052,27 @@
                     "additionalProperties": {
                         "$ref": "#/definitions/response.ValidationErrorFieldSwaggerResponse"
                     }
+                }
+            }
+        },
+        "response.PaginationSwaggerResponse": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "page": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "total_pages": {
+                    "type": "integer",
+                    "example": 10
                 }
             }
         },

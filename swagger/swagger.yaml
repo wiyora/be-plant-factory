@@ -8,6 +8,49 @@ definitions:
     x-enum-varnames:
     - CurrentStepInitial
     - CurrentStepCompleted
+  entity.UserStatus:
+    enum:
+    - active
+    - inactive
+    - banned
+    type: string
+    x-enum-varnames:
+    - UserStatusActive
+    - UserStatusInactive
+    - UserStatusBanned
+  request.CreateUserRequest:
+    properties:
+      avatar:
+        example: 'avatar: coding'
+        type: string
+      email:
+        example: rizalarfiyan@plant-factory.com
+        maxLength: 255
+        type: string
+      name:
+        example: Rizal Arfiyan
+        maxLength: 64
+        minLength: 3
+        type: string
+    required:
+    - avatar
+    - email
+    - name
+    type: object
+  request.UpdateUserRequest:
+    properties:
+      avatar:
+        example: 'avatar: coding'
+        type: string
+      name:
+        example: Rizal Arfiyan
+        maxLength: 64
+        minLength: 3
+        type: string
+    required:
+    - avatar
+    - name
+    type: object
   request.UserMeGettingStartedRequest:
     properties:
       avatar:
@@ -73,6 +116,14 @@ definitions:
         example: admin
         type: string
     type: object
+  response.BasePaginationSwaggerResponse:
+    properties:
+      data: {}
+      message:
+        $ref: '#/definitions/response.MessageSwaggerResponse'
+      pagination:
+        $ref: '#/definitions/response.PaginationSwaggerResponse'
+    type: object
   response.BaseSwaggerEmptyResponse:
     properties:
       data:
@@ -95,6 +146,41 @@ definitions:
       message:
         $ref: '#/definitions/response.MessageSwaggerValidationResponse'
     type: object
+  response.DetailUserResponse:
+    properties:
+      avatar:
+        example: 'avatar: coding'
+        type: string
+      created_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      current_step:
+        allOf:
+        - $ref: '#/definitions/entity.CurrentStep'
+        example: completed
+      email:
+        example: rizalarfiyan@plant-factory.com
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      is_super_admin:
+        example: false
+        type: boolean
+      last_logged_in_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      name:
+        example: Rizal Arfiyan
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/entity.UserStatus'
+        example: active
+      updated_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+    type: object
   response.HealthResponse:
     properties:
       environment:
@@ -109,6 +195,25 @@ definitions:
       timestamp:
         example: "2026-01-01T00:00:00Z"
         type: string
+    type: object
+  response.ListUserResponse:
+    properties:
+      avatar:
+        example: 'avatar: coding'
+        type: string
+      email:
+        example: rizalarfiyan@plant-factory.com
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Rizal Arfiyan
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/entity.UserStatus'
+        example: active
     type: object
   response.MessageSwaggerResponse:
     properties:
@@ -131,6 +236,21 @@ definitions:
         additionalProperties:
           $ref: '#/definitions/response.ValidationErrorFieldSwaggerResponse'
         type: object
+    type: object
+  response.PaginationSwaggerResponse:
+    properties:
+      limit:
+        example: 10
+        type: integer
+      page:
+        example: 1
+        type: integer
+      total:
+        example: 100
+        type: integer
+      total_pages:
+        example: 10
+        type: integer
     type: object
   response.ValidationErrorFieldSwaggerResponse:
     properties:
@@ -320,6 +440,245 @@ paths:
       summary: Check Health
       tags:
       - Health
+  /user:
+    get:
+      description: Get list of users with pagination and search
+      operationId: user-list
+      parameters:
+      - description: Search by name (min 3 chars)
+        in: query
+        name: search
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - default: id
+        description: Order by field
+        enum:
+        - id
+        - created_at
+        - name
+        - email
+        in: query
+        name: order_by
+        type: string
+      - default: desc
+        description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort_by
+        type: string
+      - description: Filter by status
+        enum:
+        - active
+        - inactive
+        - banned
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Users fetched successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BasePaginationSwaggerResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.ListUserResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerValidationResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: List Users
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      description: Create a new user
+      operationId: user-create
+      parameters:
+      - description: Create User Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "400":
+          description: Bad Request - invalid input data
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerValidationResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Create User
+      tags:
+      - User
+  /user/{id}:
+    get:
+      description: Get user detail by ID
+      operationId: user-detail
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User detail fetched successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseSwaggerResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.DetailUserResponse'
+              type: object
+        "400":
+          description: Bad Request - invalid ID
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "422":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Get User Detail
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: Update user name and avatar
+      operationId: user-update
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update User Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User updated successfully
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "400":
+          description: Bad Request - invalid input data
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerValidationResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Update User
+      tags:
+      - User
+  /user/{id}/status/{status}:
+    post:
+      description: Update user status (active, inactive, banned)
+      operationId: user-update-status
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Status
+        enum:
+        - active
+        - inactive
+        - banned
+        in: path
+        name: status
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User status updated successfully
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "400":
+          description: Bad Request - invalid status
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Update User Status
+      tags:
+      - User
   /user/me/getting-started:
     post:
       consumes:
