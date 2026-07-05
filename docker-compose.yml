@@ -42,6 +42,24 @@ services:
       timeout: 5s
       retries: 5
 
+  nanomq:
+    image: emqx/nanomq:latest
+    ports:
+      - "1883:1883"  # MQTT TCP Port
+      - "8883:8883"  # MQTT SSL/TLS Port (if configured)
+      - "8083:8083"  # MQTT WebSocket Port
+      - "8081:8081"  # HTTP REST API Port / Web Management
+    volumes:
+      - nanomq-data:/opt/nanomq/data
+
+  mqttx:
+    image: emqx/mqttx-web:latest
+    ports:
+      - "${MQTTX_HOST_PORT:-9009}:80"
+    depends_on:
+      - nanomq
+
 volumes:
   postgres-data:
   redis-data:
+  nanomq-data:

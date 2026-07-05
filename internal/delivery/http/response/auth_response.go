@@ -16,11 +16,20 @@ func NewAuthGoogleLoginResponse(redirectUrl string) AuthGoogleLoginResponse {
 }
 
 type AuthMeResponse struct {
-	ID          uuid.UUID          `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Email       string             `json:"email" example:"rizalarfiyan@ominotes.com"`
-	Name        string             `json:"name" example:"Rizal Arfiyan"`
-	Avatar      string             `json:"avatar" example:"https://ominotes.com/avatar.jpg"`
-	CurrentStep entity.CurrentStep `json:"current_step" example:"completed"`
+	ID          uuid.UUID              `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Email       string                 `json:"email" example:"rizalarfiyan@plant-factory.com"`
+	Name        string                 `json:"name" example:"Rizal Arfiyan"`
+	Avatar      string                 `json:"avatar" example:"https://plant-factory.com/avatar.jpg"`
+	CurrentStep entity.CurrentStep     `json:"current_step" example:"completed"`
+	Tenants     []AuthMeTenantResponse `json:"tenants"`
+}
+
+type AuthMeTenantResponse struct {
+	ID          uuid.UUID `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Logo        string    `json:"logo" example:"https://plant-factory.com/logo.jpg"`
+	Name        string    `json:"name" example:"Plant Factory"`
+	Role        string    `json:"role" example:"admin"`
+	Permissions []string  `json:"permissions" example:"[\"read\", \"write\"]"`
 }
 
 func NewAuthMeResponse(user entity.AuthContext) AuthMeResponse {
@@ -30,5 +39,6 @@ func NewAuthMeResponse(user entity.AuthContext) AuthMeResponse {
 		Name:        user.Name,
 		Avatar:      user.Avatar,
 		CurrentStep: user.CurrentStep,
+		Tenants:     []AuthMeTenantResponse{},
 	}
 }

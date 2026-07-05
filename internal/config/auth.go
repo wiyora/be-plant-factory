@@ -8,7 +8,7 @@ type AuthConfig struct {
 	AccessTokenDuration  time.Duration    `env:"ACCESS_TOKEN_DURATION" validate:"required,gt=0" default:"15m"`
 	RefreshTokenDuration time.Duration    `env:"REFRESH_TOKEN_DURATION" validate:"required,gt=0" default:"168h"`
 	CacheUserDuration    time.Duration    `env:"CACHE_USER_DURATION" validate:"required,gt=0" default:"5m"`
-	ToleranceDuration    time.Duration    `env:"TOLERANCE_DURATION" validate:"required,gt=0,ltfield=SocialStateDuration" default:"3m"`
+	ToleranceDuration    time.Duration    `env:"TOLERANCE_DURATION" validate:"required,gt=0,ltfield=AccessTokenDuration" default:"3m"`
 }
 
 type AuthGoogleConfig struct {

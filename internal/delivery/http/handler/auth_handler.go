@@ -261,6 +261,7 @@ func (h authHandler) RefreshToken(c fiber.Ctx) error {
 
 	res, err := h.auth.RefreshToken(c.Context(), refreshToken)
 	if err != nil {
+		h.clearCookies(c)
 		return err
 	}
 

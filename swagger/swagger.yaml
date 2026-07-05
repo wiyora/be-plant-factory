@@ -31,20 +31,46 @@ definitions:
   response.AuthMeResponse:
     properties:
       avatar:
-        example: https://ominotes.com/avatar.jpg
+        example: https://plant-factory.com/avatar.jpg
         type: string
       current_step:
         allOf:
         - $ref: '#/definitions/entity.CurrentStep'
         example: completed
       email:
-        example: rizalarfiyan@ominotes.com
+        example: rizalarfiyan@plant-factory.com
         type: string
       id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
       name:
         example: Rizal Arfiyan
+        type: string
+      tenants:
+        items:
+          $ref: '#/definitions/response.AuthMeTenantResponse'
+        type: array
+    type: object
+  response.AuthMeTenantResponse:
+    properties:
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      logo:
+        example: https://plant-factory.com/logo.jpg
+        type: string
+      name:
+        example: Plant Factory
+        type: string
+      permissions:
+        example:
+        - '["read"'
+        - ' "write"]'
+        items:
+          type: string
+        type: array
+      role:
+        example: admin
         type: string
     type: object
   response.BaseSwaggerEmptyResponse:

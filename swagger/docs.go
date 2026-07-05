@@ -393,7 +393,7 @@ const docTemplate = `{
             "properties": {
                 "avatar": {
                     "type": "string",
-                    "example": "https://ominotes.com/avatar.jpg"
+                    "example": "https://plant-factory.com/avatar.jpg"
                 },
                 "current_step": {
                     "allOf": [
@@ -405,7 +405,7 @@ const docTemplate = `{
                 },
                 "email": {
                     "type": "string",
-                    "example": "rizalarfiyan@ominotes.com"
+                    "example": "rizalarfiyan@plant-factory.com"
                 },
                 "id": {
                     "type": "string",
@@ -414,6 +414,43 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "Rizal Arfiyan"
+                },
+                "tenants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.AuthMeTenantResponse"
+                    }
+                }
+            }
+        },
+        "response.AuthMeTenantResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "logo": {
+                    "type": "string",
+                    "example": "https://plant-factory.com/logo.jpg"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Plant Factory"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"read\"",
+                        " \"write\"]"
+                    ]
+                },
+                "role": {
+                    "type": "string",
+                    "example": "admin"
                 }
             }
         },
