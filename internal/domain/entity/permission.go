@@ -63,3 +63,14 @@ func (p Permission) IsSuperAdmin() bool {
 func (p Permission) String() string {
 	return string(p)
 }
+
+type RolePermission struct {
+	Key     Permission
+	Label   string
+	Require []Permission
+}
+
+type PermissionModule struct {
+	Name        string
+	Permissions []RolePermission
+}

@@ -8,8 +8,8 @@ CREATE TABLE user_tenants (
 );
 
 CREATE INDEX idx_user_tenants_tenant_id ON user_tenants (tenant_id);
+CREATE INDEX idx_user_tenants_role_id ON user_tenants(role_id);
 
 ---- create above / drop below ----
 
-DROP INDEX IF EXISTS idx_user_tenants_tenant_id;
 DROP TABLE IF EXISTS user_tenants;

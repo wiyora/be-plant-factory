@@ -12,11 +12,13 @@ type Router interface {
 }
 
 type router struct {
-	mid    middleware.Middleware `do:""`
-	health handler.HealthHandler `do:""`
-	auth   handler.AuthHandler   `do:""`
-	userMe handler.UserMeHandler `do:""`
-	user   handler.UserHandler   `do:""`
+	mid        middleware.Middleware     `do:""`
+	health     handler.HealthHandler     `do:""`
+	auth       handler.AuthHandler       `do:""`
+	userMe     handler.UserMeHandler     `do:""`
+	user       handler.UserHandler       `do:""`
+	role       handler.RoleHandler       `do:""`
+	permission handler.PermissionHandler `do:""`
 }
 
 func New(i do.Injector) (Router, error) {
@@ -29,6 +31,8 @@ func (r *router) Register(app *fiber.App) {
 	r.authRoute(app.Group("/auth"))
 	r.userRoute(app.Group("/user"))
 	r.userMeRoute(app.Group("/user/me"))
+	r.roleRoute(app.Group("/role"))
+	r.permissionRoute(app.Group("/permission"))
 }
 
 func (r *router) authRoute(route fiber.Router) {
@@ -51,4 +55,16 @@ func (r *router) userRoute(route fiber.Router) {
 
 func (r *router) userMeRoute(route fiber.Router) {
 	route.Post("/getting-started", r.mid.Auth(), r.userMe.GettingStarted)
+}
+
+func (r *router) roleRoute(route fiber.Router) {
+	route.Get("", r.mid.Auth(), r.role.List)
+	route.Get("/:id", r.mid.Auth(), r.role.Detail)
+	route.Post("", r.mid.Auth(), r.role.Create)
+	route.Put("/:id", r.mid.Auth(), r.role.Update)
+	route.Delete("/:id", r.mid.Auth(), r.role.Delete)
+}
+
+func (r *router) permissionRoute(route fiber.Router) {
+	route.Get("", r.mid.Auth(), r.permission.All)
 }

@@ -8,6 +8,44 @@ definitions:
     x-enum-varnames:
     - CurrentStepInitial
     - CurrentStepCompleted
+  entity.Permission:
+    enum:
+    - super-admin
+    - user:list
+    - user:detail
+    - user:create
+    - user:update
+    - user:update-status
+    - user:assign-role-tenant
+    - role:list
+    - role:detail
+    - role:create
+    - role:update
+    - role:delete
+    - tenant:list
+    - tenant:detail
+    - tenant:create
+    - tenant:update
+    - tenant:update-status
+    type: string
+    x-enum-varnames:
+    - PermissionSuperAdmin
+    - PermissionUserList
+    - PermissionUserDetail
+    - PermissionUserCreate
+    - PermissionUserUpdate
+    - PermissionUserUpdateStatus
+    - PermissionUserAssignRoleTenant
+    - PermissionRoleList
+    - PermissionRoleDetail
+    - PermissionRoleCreate
+    - PermissionRoleUpdate
+    - PermissionRoleDelete
+    - PermissionTenantList
+    - PermissionTenantDetail
+    - PermissionTenantCreate
+    - PermissionTenantUpdate
+    - PermissionTenantUpdateStatus
   entity.UserStatus:
     enum:
     - active
@@ -18,6 +56,28 @@ definitions:
     - UserStatusActive
     - UserStatusInactive
     - UserStatusBanned
+  request.CreateUpdateRoleRequest:
+    properties:
+      id:
+        type: string
+      name:
+        example: Admin
+        maxLength: 32
+        minLength: 3
+        type: string
+      permissions:
+        example:
+        - user:list
+        - user:detail
+        items:
+          $ref: '#/definitions/entity.Permission'
+        minItems: 1
+        type: array
+        uniqueItems: true
+    required:
+    - name
+    - permissions
+    type: object
   request.CreateUserRequest:
     properties:
       avatar:
@@ -146,6 +206,28 @@ definitions:
       message:
         $ref: '#/definitions/response.MessageSwaggerValidationResponse'
     type: object
+  response.DetailRoleResponse:
+    properties:
+      created_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Admin
+        type: string
+      permissions:
+        items:
+          $ref: '#/definitions/entity.Permission'
+        type: array
+      total_permission:
+        example: 5
+        type: integer
+      updated_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+    type: object
   response.DetailUserResponse:
     properties:
       avatar:
@@ -195,6 +277,21 @@ definitions:
       timestamp:
         example: "2026-01-01T00:00:00Z"
         type: string
+    type: object
+  response.ListRoleResponse:
+    properties:
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Admin
+        type: string
+      total_permission:
+        example: 5
+        type: integer
+      total_user:
+        example: 10
+        type: integer
     type: object
   response.ListUserResponse:
     properties:
@@ -251,6 +348,32 @@ definitions:
       total_pages:
         example: 10
         type: integer
+    type: object
+  response.PermissionModule:
+    properties:
+      name:
+        example: User Management
+        type: string
+      permissions:
+        items:
+          $ref: '#/definitions/response.RolePermission'
+        type: array
+    type: object
+  response.RolePermission:
+    properties:
+      key:
+        allOf:
+        - $ref: '#/definitions/entity.Permission'
+        example: user:create
+      label:
+        example: Create User
+        type: string
+      require:
+        example:
+        - user:list
+        items:
+          $ref: '#/definitions/entity.Permission'
+        type: array
     type: object
   response.ValidationErrorFieldSwaggerResponse:
     properties:
@@ -449,6 +572,275 @@ paths:
       summary: Check Health
       tags:
       - Health
+  /permission:
+    get:
+      description: Get all available permission modules with their permissions
+      operationId: permission-list
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Permissions fetched successfully. Available code (SUCCESS)
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseSwaggerResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.PermissionModule'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Get All Permissions
+      tags:
+      - Permission
+  /role:
+    get:
+      description: Get list of roles with pagination and search
+      operationId: role-list
+      parameters:
+      - description: Search by name (min 3 chars)
+        in: query
+        name: search
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - default: id
+        description: Order by field
+        enum:
+        - id
+        - name
+        - created_at
+        - total_permission
+        in: query
+        name: order_by
+        type: string
+      - default: desc
+        description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort_by
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Roles fetched successfully. Available code (LIST_FETCHED)
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BasePaginationSwaggerResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.ListRoleResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerValidationResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: List Roles
+      tags:
+      - Role
+    post:
+      consumes:
+      - application/json
+      description: 'Create a new role. Validation: name REQUIRED, MIN 3, MAX 32; permissions
+        REQUIRED, MIN 1'
+      operationId: role-create
+      parameters:
+      - description: Create Role Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateUpdateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Role created successfully. Available code (CREATED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "400":
+          description: Bad Request - invalid input data. Available code (VALIDATION_ERROR,
+            BAD_REQUEST)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerValidationResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "422":
+          description: Role name already exists. Available code (ROLE_NAME_EXISTS)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Create Role
+      tags:
+      - Role
+  /role/{id}:
+    delete:
+      description: Delete role by ID
+      operationId: role-delete
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role deleted successfully. Available code (DELETED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "400":
+          description: Bad Request - invalid ID. Available code (INVALID_PARAM_ID)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "422":
+          description: Role not found. Available code (ROLE_NOT_FOUND)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Delete Role
+      tags:
+      - Role
+    get:
+      description: Get role detail by ID with permissions
+      operationId: role-detail
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role detail fetched successfully. Available code (DETAIL_FETCHED)
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseSwaggerResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.DetailRoleResponse'
+              type: object
+        "400":
+          description: Bad Request - invalid ID. Available code (INVALID_PARAM_ID)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "422":
+          description: Role not found. Available code (ROLE_NOT_FOUND)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Get Role Detail
+      tags:
+      - Role
+    put:
+      consumes:
+      - application/json
+      description: 'Update role name and permissions. Validation: name REQUIRED, MIN
+        3, MAX 32; permissions REQUIRED, MIN 1'
+      operationId: role-update
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Role Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateUpdateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role updated successfully. Available code (UPDATED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "400":
+          description: Bad Request - invalid input data. Available code (VALIDATION_ERROR,
+            BAD_REQUEST)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerValidationResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "422":
+          description: Role not found or name already exists. Available code (ROLE_NOT_FOUND,
+            ROLE_NAME_EXISTS)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Update Role
+      tags:
+      - Role
   /user:
     get:
       description: Get list of users with pagination and search

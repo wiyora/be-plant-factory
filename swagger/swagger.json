@@ -287,6 +287,423 @@
                 }
             }
         },
+        "/permission": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Get all available permission modules with their permissions",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Permission"
+                ],
+                "summary": "Get All Permissions",
+                "operationId": "permission-list",
+                "responses": {
+                    "200": {
+                        "description": "Permissions fetched successfully. Available code (SUCCESS)",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BaseSwaggerResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.PermissionModule"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/role": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Get list of roles with pagination and search",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Role"
+                ],
+                "summary": "List Roles",
+                "operationId": "role-list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search by name (min 3 chars)",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "id",
+                            "name",
+                            "created_at",
+                            "total_permission"
+                        ],
+                        "type": "string",
+                        "default": "id",
+                        "description": "Order by field",
+                        "name": "order_by",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "desc",
+                        "description": "Sort direction",
+                        "name": "sort_by",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Roles fetched successfully. Available code (LIST_FETCHED)",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BasePaginationSwaggerResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.ListRoleResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Create a new role. Validation: name REQUIRED, MIN 3, MAX 32; permissions REQUIRED, MIN 1",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Role"
+                ],
+                "summary": "Create Role",
+                "operationId": "role-create",
+                "parameters": [
+                    {
+                        "description": "Create Role Payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreateUpdateRoleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Role created successfully. Available code (CREATED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - invalid input data. Available code (VALIDATION_ERROR, BAD_REQUEST)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Role name already exists. Available code (ROLE_NAME_EXISTS)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/role/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Get role detail by ID with permissions",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Role"
+                ],
+                "summary": "Get Role Detail",
+                "operationId": "role-detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Role detail fetched successfully. Available code (DETAIL_FETCHED)",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BaseSwaggerResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.DetailRoleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - invalid ID. Available code (INVALID_PARAM_ID)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Role not found. Available code (ROLE_NOT_FOUND)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Update role name and permissions. Validation: name REQUIRED, MIN 3, MAX 32; permissions REQUIRED, MIN 1",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Role"
+                ],
+                "summary": "Update Role",
+                "operationId": "role-update",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Role Payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreateUpdateRoleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Role updated successfully. Available code (UPDATED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - invalid input data. Available code (VALIDATION_ERROR, BAD_REQUEST)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Role not found or name already exists. Available code (ROLE_NOT_FOUND, ROLE_NAME_EXISTS)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Delete role by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Role"
+                ],
+                "summary": "Delete Role",
+                "operationId": "role-delete",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Role deleted successfully. Available code (DELETED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - invalid ID. Available code (INVALID_PARAM_ID)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Role not found. Available code (ROLE_NOT_FOUND)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/user": {
             "get": {
                 "security": [
@@ -741,6 +1158,47 @@
                 "CurrentStepCompleted"
             ]
         },
+        "entity.Permission": {
+            "type": "string",
+            "enum": [
+                "super-admin",
+                "user:list",
+                "user:detail",
+                "user:create",
+                "user:update",
+                "user:update-status",
+                "user:assign-role-tenant",
+                "role:list",
+                "role:detail",
+                "role:create",
+                "role:update",
+                "role:delete",
+                "tenant:list",
+                "tenant:detail",
+                "tenant:create",
+                "tenant:update",
+                "tenant:update-status"
+            ],
+            "x-enum-varnames": [
+                "PermissionSuperAdmin",
+                "PermissionUserList",
+                "PermissionUserDetail",
+                "PermissionUserCreate",
+                "PermissionUserUpdate",
+                "PermissionUserUpdateStatus",
+                "PermissionUserAssignRoleTenant",
+                "PermissionRoleList",
+                "PermissionRoleDetail",
+                "PermissionRoleCreate",
+                "PermissionRoleUpdate",
+                "PermissionRoleDelete",
+                "PermissionTenantList",
+                "PermissionTenantDetail",
+                "PermissionTenantCreate",
+                "PermissionTenantUpdate",
+                "PermissionTenantUpdateStatus"
+            ]
+        },
         "entity.UserStatus": {
             "type": "string",
             "enum": [
@@ -753,6 +1211,36 @@
                 "UserStatusInactive",
                 "UserStatusBanned"
             ]
+        },
+        "request.CreateUpdateRoleRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "permissions"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 3,
+                    "example": "Admin"
+                },
+                "permissions": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                        "$ref": "#/definitions/entity.Permission"
+                    },
+                    "example": [
+                        "user:list",
+                        "user:detail"
+                    ]
+                }
+            }
         },
         "request.CreateUserRequest": {
             "type": "object",
@@ -937,6 +1425,37 @@
                 }
             }
         },
+        "response.DetailRoleResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Admin"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Permission"
+                    }
+                },
+                "total_permission": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                }
+            }
+        },
         "response.DetailUserResponse": {
             "type": "object",
             "properties": {
@@ -1008,6 +1527,27 @@
                 "timestamp": {
                     "type": "string",
                     "example": "2026-01-01T00:00:00Z"
+                }
+            }
+        },
+        "response.ListRoleResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Admin"
+                },
+                "total_permission": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "total_user": {
+                    "type": "integer",
+                    "example": 10
                 }
             }
         },
@@ -1091,6 +1631,47 @@
                 "total_pages": {
                     "type": "integer",
                     "example": 10
+                }
+            }
+        },
+        "response.PermissionModule": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "User Management"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.RolePermission"
+                    }
+                }
+            }
+        },
+        "response.RolePermission": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.Permission"
+                        }
+                    ],
+                    "example": "user:create"
+                },
+                "label": {
+                    "type": "string",
+                    "example": "Create User"
+                },
+                "require": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Permission"
+                    },
+                    "example": [
+                        "user:list"
+                    ]
                 }
             }
         },
