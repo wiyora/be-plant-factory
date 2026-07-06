@@ -8,7 +8,9 @@ const (
 	LayerValidator Layer = "validator"
 	LayerPostgres  Layer = "postgres"
 	LayerRedis     Layer = "redis"
+	LayerS3        Layer = "s3"
 	LayerHttp      Layer = "http"
+	LayerScheduler Layer = "scheduler"
 
 	LayerHTTPServer         Layer = "http_server"
 	LayerMiddleware         Layer = "middleware"
@@ -17,4 +19,11 @@ const (
 	LayerPostgresRepository Layer = "postgres_repository"
 	LayerRedisRepository    Layer = "redis_repository"
 	LayerCacheRepository    Layer = "cache_repository"
+	LayerS3Repository       Layer = "s3_repository"
+)
+
+type Section string
+
+const (
+	SectionCron Section = "cron"
 )

@@ -13,3 +13,7 @@ func WithLayerCtx(ctx context.Context, layer Layer) zerolog.Logger {
 func WithLayer(log *zerolog.Logger, layer Layer) zerolog.Logger {
 	return log.With().Str("layer", string(layer)).Logger()
 }
+
+func WithSection(log *zerolog.Logger, section Section) zerolog.Logger {
+	return log.With().Str("section", string(section)).Logger()
+}

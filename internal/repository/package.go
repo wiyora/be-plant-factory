@@ -4,6 +4,7 @@ import (
 	"github.com/rizalarfiyan/be-plant-factory/internal/repository/cache"
 	"github.com/rizalarfiyan/be-plant-factory/internal/repository/postgres"
 	"github.com/rizalarfiyan/be-plant-factory/internal/repository/redis"
+	"github.com/rizalarfiyan/be-plant-factory/internal/repository/storage"
 	"github.com/samber/do/v2"
 )
 
@@ -23,4 +24,7 @@ var Package = do.Package(
 
 	// Cache repositories
 	do.Lazy(cache.NewUserRepository),
+
+	// Storage repositories
+	do.Lazy(storage.NewS3Repository),
 )

@@ -46,6 +46,14 @@ definitions:
     - PermissionTenantCreate
     - PermissionTenantUpdate
     - PermissionTenantUpdateStatus
+  entity.StorageType:
+    enum:
+    - avatar
+    - tenant-logo
+    type: string
+    x-enum-varnames:
+    - StorageTypeAvatar
+    - StorageTypeTenantLogo
   entity.UserStatus:
     enum:
     - active
@@ -96,6 +104,27 @@ definitions:
     - avatar
     - email
     - name
+    type: object
+  request.StoragePresignedUploadRequest:
+    properties:
+      extensions:
+        example: .png
+        type: string
+      file-size:
+        example: 1048576
+        type: integer
+      mime-type:
+        example: image/png
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/entity.StorageType'
+        example: avatar
+    required:
+    - extensions
+    - file-size
+    - mime-type
+    - type
     type: object
   request.UpdateUserRequest:
     properties:
@@ -374,6 +403,15 @@ definitions:
         items:
           $ref: '#/definitions/entity.Permission'
         type: array
+    type: object
+  response.StoragePresignedUploadResponse:
+    properties:
+      fields:
+        additionalProperties:
+          type: string
+        type: object
+      url:
+        type: string
     type: object
   response.ValidationErrorFieldSwaggerResponse:
     properties:
@@ -841,6 +879,51 @@ paths:
       summary: Update Role
       tags:
       - Role
+  /storage/presigned-upload:
+    post:
+      consumes:
+      - application/json
+      description: 'Generate presigned Upload for file upload. Validation: mime-type
+        REQUIRED, INVALID; filesize REQUIRED, MAX_FILE_SIZE_EXCEEDED, MIN_FILE_SIZE_EXCEEDED,
+        GT 0; extensions REQUIRED, INVALID; type REQUIRED, must be one of (avatar)'
+      operationId: storage-presigned-upload
+      parameters:
+      - description: Presigned Upload Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.StoragePresignedUploadRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Presigned Upload generated successfully. Available code (OK)
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseSwaggerResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.StoragePresignedUploadResponse'
+              type: object
+        "400":
+          description: Bad Request - invalid input data. Available code (VALIDATION_ERROR,
+            BAD_REQUEST)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerValidationResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Generate Presigned Upload
+      tags:
+      - Storage
   /user:
     get:
       description: Get list of users with pagination and search

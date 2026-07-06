@@ -8,10 +8,12 @@ import (
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v3"
 	"github.com/rizalarfiyan/be-plant-factory/internal/config"
+	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/cron"
 	httpError "github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/error"
 	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/middleware"
 	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/route"
 	"github.com/rizalarfiyan/be-plant-factory/internal/infrastructure/logger"
+	"github.com/rizalarfiyan/be-plant-factory/internal/infrastructure/scheduler"
 	"github.com/rizalarfiyan/be-plant-factory/internal/infrastructure/validator"
 	"github.com/rizalarfiyan/be-plant-factory/internal/shared/constant"
 	"github.com/rs/zerolog"
@@ -19,11 +21,11 @@ import (
 )
 
 type Server struct {
-	app   *fiber.App
-	conf  *config.Config
-	log   zerolog.Logger
-	mid   middleware.Middleware
-	route route.Router
+	app       *fiber.App
+	conf      *config.Config
+	log       zerolog.Logger
+	route     route.Router
+	scheduler scheduler.Scheduler
 }
 
 func NewServer(i do.Injector) (*Server, error) {
@@ -32,8 +34,15 @@ func NewServer(i do.Injector) (*Server, error) {
 	mid := do.MustInvoke[middleware.Middleware](i)
 	route := do.MustInvoke[route.Router](i)
 	validate := do.MustInvoke[*validator.Validate](i)
+	scheduler := do.MustInvoke[scheduler.Scheduler](i)
+	cron := do.MustInvoke[cron.Cron](i)
 
 	log := logger.WithLayer(rawLog, logger.LayerHttp)
+
+	if err := cron.MapJobs(); err != nil {
+		log.Error().Err(err).Msg("Failed to map cron jobs")
+		return nil, err
+	}
 
 	log.Info().Msg("Initializing http server")
 
@@ -57,7 +66,6 @@ func NewServer(i do.Injector) (*Server, error) {
 		},
 	})
 
-	// TODO: check later, the code is changes memory leak or not
 	app.State().Set(constant.AppStateValidatorKey, validate.Validator())
 
 	log.Info().Msg("Registering http server middleware")
@@ -67,15 +75,17 @@ func NewServer(i do.Injector) (*Server, error) {
 	route.Register(app)
 
 	return &Server{
-		conf:  conf,
-		log:   log,
-		mid:   mid,
-		route: route,
-		app:   app,
+		conf:      conf,
+		log:       log,
+		route:     route,
+		app:       app,
+		scheduler: scheduler,
 	}, nil
 }
 
 func (s *Server) Start() (err error) {
+	s.scheduler.Start()
+
 	s.app.Server().ReadTimeout = s.conf.HTTP.ReadTimeout
 	s.app.Server().WriteTimeout = s.conf.HTTP.WriteTimeout
 	s.app.Server().IdleTimeout = s.conf.HTTP.IdleTimeout

@@ -1,7 +1,9 @@
 {
     "cSpell.words": [
+        "gocron",
         "healthcheck",
         "mapset",
+        "Presign",
         "rustfs"
     ]
 }

@@ -19,6 +19,7 @@ type router struct {
 	user       handler.UserHandler       `do:""`
 	role       handler.RoleHandler       `do:""`
 	permission handler.PermissionHandler `do:""`
+	storage    handler.StorageHandler    `do:""`
 }
 
 func New(i do.Injector) (Router, error) {
@@ -33,6 +34,7 @@ func (r *router) Register(app *fiber.App) {
 	r.userMeRoute(app.Group("/user/me"))
 	r.roleRoute(app.Group("/role"))
 	r.permissionRoute(app.Group("/permission"))
+	r.storageRoute(app.Group("/storage"))
 }
 
 func (r *router) authRoute(route fiber.Router) {
@@ -67,4 +69,8 @@ func (r *router) roleRoute(route fiber.Router) {
 
 func (r *router) permissionRoute(route fiber.Router) {
 	route.Get("", r.mid.Auth(), r.permission.All)
+}
+
+func (r *router) storageRoute(route fiber.Router) {
+	route.Post("/presigned-upload", r.mid.Auth(), r.storage.PresignedUpload)
 }

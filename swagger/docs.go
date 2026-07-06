@@ -712,6 +712,76 @@ const docTemplate = `{
                 }
             }
         },
+        "/storage/presigned-upload": {
+            "post": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Generate presigned Upload for file upload. Validation: mime-type REQUIRED, INVALID; filesize REQUIRED, MAX_FILE_SIZE_EXCEEDED, MIN_FILE_SIZE_EXCEEDED, GT 0; extensions REQUIRED, INVALID; type REQUIRED, must be one of (avatar)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Storage"
+                ],
+                "summary": "Generate Presigned Upload",
+                "operationId": "storage-presigned-upload",
+                "parameters": [
+                    {
+                        "description": "Presigned Upload Payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.StoragePresignedUploadRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Presigned Upload generated successfully. Available code (OK)",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BaseSwaggerResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.StoragePresignedUploadResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - invalid input data. Available code (VALIDATION_ERROR, BAD_REQUEST)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/user": {
             "get": {
                 "security": [
@@ -1207,6 +1277,17 @@ const docTemplate = `{
                 "PermissionTenantUpdateStatus"
             ]
         },
+        "entity.StorageType": {
+            "type": "string",
+            "enum": [
+                "avatar",
+                "tenant-logo"
+            ],
+            "x-enum-varnames": [
+                "StorageTypeAvatar",
+                "StorageTypeTenantLogo"
+            ]
+        },
         "entity.UserStatus": {
             "type": "string",
             "enum": [
@@ -1272,6 +1353,37 @@ const docTemplate = `{
                     "maxLength": 64,
                     "minLength": 3,
                     "example": "Rizal Arfiyan"
+                }
+            }
+        },
+        "request.StoragePresignedUploadRequest": {
+            "type": "object",
+            "required": [
+                "extensions",
+                "file-size",
+                "mime-type",
+                "type"
+            ],
+            "properties": {
+                "extensions": {
+                    "type": "string",
+                    "example": ".png"
+                },
+                "file-size": {
+                    "type": "integer",
+                    "example": 1048576
+                },
+                "mime-type": {
+                    "type": "string",
+                    "example": "image/png"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.StorageType"
+                        }
+                    ],
+                    "example": "avatar"
                 }
             }
         },
@@ -1680,6 +1792,20 @@ const docTemplate = `{
                     "example": [
                         "user:list"
                     ]
+                }
+            }
+        },
+        "response.StoragePresignedUploadResponse": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/rizalarfiyan/be-plant-factory/internal/config"
+	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/cron"
 	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/handler"
 	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/middleware"
 	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/route"
@@ -32,6 +33,9 @@ func NewContainer(log *zerolog.Logger, conf *config.Config) (do.Injector, error)
 	do.Provide(injector, route.New)
 	do.Provide(injector, middleware.New)
 	do.Provide(injector, NewServer)
+
+	// Cron
+	do.Provide(injector, cron.New)
 
 	return injector, nil
 }

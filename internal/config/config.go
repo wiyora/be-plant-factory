@@ -30,6 +30,7 @@ type Config struct {
 	Auth     AuthConfig     `env:"AUTH"`
 	Swagger  SwaggerConfig  `env:"SWAGGER"`
 	Frontend FrontendConfig `env:"FRONTEND"`
+	S3       S3Config       `env:"S3"`
 }
 
 type Loader interface {
