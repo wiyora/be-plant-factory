@@ -42,6 +42,28 @@ services:
       timeout: 5s
       retries: 5
 
+  rustfs:
+    image: rustfs/rustfs:latest
+    security_opt:
+      - "no-new-privileges:true"
+    ports:
+      - "9000:9000" # S3 API endpoint
+      - "9001:9001" # Web Console UI
+    environment:
+      - RUSTFS_ROOT_USER=${RUSTFS_ROOT_USER:-admin}
+      - RUSTFS_ROOT_PASSWORD=${RUSTFS_ROOT_PASSWORD:-password}
+      - RUSTFS_OBS_LOG_DIRECTORY=/logs
+      - RUSTFS_VOLUMES=/data
+    volumes:
+      - rustfs-data:/data
+      - rustfs-logs:/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
   nanomq:
     image: emqx/nanomq:latest
     ports:
@@ -63,3 +85,5 @@ volumes:
   postgres-data:
   redis-data:
   nanomq-data:
+  rustfs-data:
+  rustfs-logs:
