@@ -37,3 +37,4 @@ DROP INDEX IF EXISTS idx_sessions_refresh_hash;
 DROP TABLE IF EXISTS sessions;
 DROP TABLE IF EXISTS users;
 DROP TYPE IF EXISTS user_current_step;
+DROP TYPE IF EXISTS user_status;
