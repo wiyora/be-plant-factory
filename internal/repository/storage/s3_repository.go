@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/rizalarfiyan/be-plant-factory/internal/domain/entity"
+	domainError "github.com/rizalarfiyan/be-plant-factory/internal/domain/error"
 	"github.com/rizalarfiyan/be-plant-factory/internal/infrastructure/logger"
 	"github.com/rizalarfiyan/be-plant-factory/internal/infrastructure/s3client"
 	"github.com/rizalarfiyan/be-plant-factory/internal/shared/helper"
@@ -18,6 +19,9 @@ type S3Repository interface {
 	GeneratePresignedUpload(ctx context.Context, req entity.StorageGeneratePresignedUpload) (StoragePresignedUpload, error)
 	CleanupTemporary(ctx context.Context) error
 	BatchDelete(ctx context.Context, objects []types.ObjectIdentifier) error
+	Move(ctx context.Context, srcKey, dstKey string) error
+	Diff(ctx context.Context, diff entity.StorageDiff) error
+	Diffs(ctx context.Context, diff entity.StorageDiffs) error
 }
 
 type s3Repository struct {
@@ -112,6 +116,102 @@ func (r s3Repository) BatchDelete(ctx context.Context, objects []types.ObjectIde
 			log.Error().Err(err).Int("batch_size", len(batch)).Msg("failed to delete objects")
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (r s3Repository) Move(ctx context.Context, srcKey, dstKey string) error {
+	log := logger.WithLayerCtx(ctx, logger.LayerS3Repository)
+
+	copyInput := &s3.CopyObjectInput{
+		Bucket:     aws.String(r.bucket),
+		CopySource: aws.String(r.bucket + "/" + srcKey),
+		Key:        aws.String(dstKey),
+	}
+
+	if _, err := r.client.CopyObject(ctx, copyInput); err != nil {
+		log.Error().Err(err).Str("src", srcKey).Str("dst", dstKey).Msg("failed to copy object")
+		return err
+	}
+
+	deleteInput := &s3.DeleteObjectInput{
+		Bucket: aws.String(r.bucket),
+		Key:    aws.String(srcKey),
+	}
+
+	if _, err := r.client.DeleteObject(ctx, deleteInput); err != nil {
+		log.Error().Err(err).Str("src", srcKey).Msg("failed to delete source object after copy")
+		return err
+	}
+
+	return nil
+}
+
+func (r s3Repository) Diff(ctx context.Context, diff entity.StorageDiff) error {
+	log := logger.WithLayerCtx(ctx, logger.LayerS3Repository)
+
+	if !diff.IsValid {
+		return nil
+	}
+
+	if helper.IsEmptyStruct(diff.Added) {
+		if err := r.Move(ctx, diff.Added.From, diff.Added.To); err != nil {
+			log.Error().Err(err).Interface("added", diff.Added).Msg("failed to process diff move operation")
+			return err
+		}
+	}
+
+	if diff.Removed != "" {
+		obj := types.ObjectIdentifier{Key: aws.String(diff.Removed)}
+		if err := r.BatchDelete(ctx, []types.ObjectIdentifier{obj}); err != nil {
+			log.Error().Err(err).Str("removed", diff.Removed).Msg("failed to process diff remove operation")
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (r s3Repository) Diffs(ctx context.Context, diff entity.StorageDiffs) error {
+	log := logger.WithLayerCtx(ctx, logger.LayerS3Repository)
+
+	if !diff.IsValid {
+		return nil
+	}
+
+	var errCount int
+
+	for _, moveOp := range diff.Added {
+		if helper.IsEmptyStruct(diff.Added) {
+			continue
+		}
+
+		if err := r.Move(ctx, moveOp.From, moveOp.To); err != nil {
+			log.Error().Err(err).Interface("move_op", moveOp).Msg("failed to move object in bulk diff")
+			errCount++
+		}
+	}
+
+	if len(diff.Removed) > 0 {
+		var objects []types.ObjectIdentifier
+		for _, key := range diff.Removed {
+			if key != "" {
+				objects = append(objects, types.ObjectIdentifier{Key: aws.String(key)})
+			}
+		}
+
+		if len(objects) > 0 {
+			if err := r.BatchDelete(ctx, objects); err != nil {
+				log.Error().Err(err).Int("count", len(objects)).Msg("failed to delete objects in bulk diff")
+				errCount++
+			}
+		}
+	}
+
+	if errCount > 0 {
+		log.Error().Int("error_count", errCount).Msg("bulk storage diff completed with errors")
+		return domainError.ErrStorageDiffInvalid
 	}
 
 	return nil

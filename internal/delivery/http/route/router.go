@@ -18,6 +18,7 @@ type router struct {
 	userMe     handler.UserMeHandler     `do:""`
 	user       handler.UserHandler       `do:""`
 	role       handler.RoleHandler       `do:""`
+	tenant     handler.TenantHandler     `do:""`
 	permission handler.PermissionHandler `do:""`
 	storage    handler.StorageHandler    `do:""`
 }
@@ -33,6 +34,7 @@ func (r *router) Register(app *fiber.App) {
 	r.userRoute(app.Group("/user"))
 	r.userMeRoute(app.Group("/user/me"))
 	r.roleRoute(app.Group("/role"))
+	r.tenantRoute(app.Group("/tenant"))
 	r.permissionRoute(app.Group("/permission"))
 	r.storageRoute(app.Group("/storage"))
 }
@@ -65,6 +67,14 @@ func (r *router) roleRoute(route fiber.Router) {
 	route.Post("", r.mid.Auth(), r.role.Create)
 	route.Put("/:id", r.mid.Auth(), r.role.Update)
 	route.Delete("/:id", r.mid.Auth(), r.role.Delete)
+}
+
+func (r *router) tenantRoute(route fiber.Router) {
+	route.Get("", r.mid.Auth(), r.tenant.List)
+	route.Get("/:id", r.mid.Auth(), r.tenant.Detail)
+	route.Post("", r.mid.Auth(), r.tenant.Create)
+	route.Put("/:id", r.mid.Auth(), r.tenant.Update)
+	route.Post("/:id/status/:status", r.mid.Auth(), r.tenant.UpdateStatus)
 }
 
 func (r *router) permissionRoute(route fiber.Router) {

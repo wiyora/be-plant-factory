@@ -54,6 +54,16 @@ definitions:
     x-enum-varnames:
     - StorageTypeAvatar
     - StorageTypeTenantLogo
+  entity.TenantStatus:
+    enum:
+    - active
+    - inactive
+    - suspended
+    type: string
+    x-enum-varnames:
+    - TenantStatusActive
+    - TenantStatusInactive
+    - TenantStatusSuspended
   entity.UserStatus:
     enum:
     - active
@@ -64,6 +74,20 @@ definitions:
     - UserStatusActive
     - UserStatusInactive
     - UserStatusBanned
+  request.CreateTenantRequest:
+    properties:
+      logo:
+        example: temp/tenant/logo/123e4567-e89b-12d3-a456-426614174000.png
+        type: string
+      name:
+        example: My Tenant
+        maxLength: 32
+        minLength: 3
+        type: string
+    required:
+    - logo
+    - name
+    type: object
   request.CreateUpdateRoleRequest:
     properties:
       id:
@@ -125,6 +149,19 @@ definitions:
     - file-size
     - mime-type
     - type
+    type: object
+  request.UpdateTenantRequest:
+    properties:
+      logo:
+        example: temp/tenant/logo/123e4567-e89b-12d3-a456-426614174000.png
+        type: string
+      name:
+        example: My Tenant
+        maxLength: 32
+        minLength: 3
+        type: string
+    required:
+    - name
     type: object
   request.UpdateUserRequest:
     properties:
@@ -257,6 +294,28 @@ definitions:
         example: "2024-01-01T00:00:00Z"
         type: string
     type: object
+  response.DetailTenantResponse:
+    properties:
+      created_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      logo:
+        example: tenant/logo/uuid.png
+        type: string
+      name:
+        example: My Tenant
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/entity.TenantStatus'
+        example: active
+      updated_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+    type: object
   response.DetailUserResponse:
     properties:
       avatar:
@@ -321,6 +380,22 @@ definitions:
       total_user:
         example: 10
         type: integer
+    type: object
+  response.ListTenantResponse:
+    properties:
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      logo:
+        example: tenant/logo/uuid.png
+        type: string
+      name:
+        example: My Tenant
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/entity.TenantStatus'
+        example: active
     type: object
   response.ListUserResponse:
     properties:
@@ -924,6 +999,250 @@ paths:
       summary: Generate Presigned Upload
       tags:
       - Storage
+  /tenant:
+    get:
+      description: Get list of tenants with pagination and search
+      operationId: tenant-list
+      parameters:
+      - description: Search by name (min 3 chars)
+        in: query
+        name: search
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - default: id
+        description: Order by field
+        enum:
+        - id
+        - created_at
+        - name
+        in: query
+        name: order_by
+        type: string
+      - default: desc
+        description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort_by
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tenants fetched successfully. Available code (LIST_FETCHED)
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BasePaginationSwaggerResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.ListTenantResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerValidationResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: List Tenants
+      tags:
+      - Tenant
+    post:
+      consumes:
+      - application/json
+      description: 'Create a new tenant. Validation: name REQUIRED, ALPHASPACE, MIN
+        3, MAX 32; logo REQUIRED, STORAGE tenant-logo'
+      operationId: tenant-create
+      parameters:
+      - description: Create Tenant Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateTenantRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Tenant created successfully. Available code (CREATED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "400":
+          description: Bad Request - invalid input data. Available code (VALIDATION_ERROR,
+            BAD_REQUEST)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerValidationResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Create Tenant
+      tags:
+      - Tenant
+  /tenant/{id}:
+    get:
+      description: Get tenant detail by ID
+      operationId: tenant-detail
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tenant detail fetched successfully. Available code (DETAIL_FETCHED)
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseSwaggerResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.DetailTenantResponse'
+              type: object
+        "400":
+          description: Bad Request - invalid ID. Available code (INVALID_PARAM_ID)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "422":
+          description: Tenant not found. Available code (TENANT_NOT_FOUND)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Get Tenant Detail
+      tags:
+      - Tenant
+    put:
+      consumes:
+      - application/json
+      description: 'Update tenant name and logo. Validation: name REQUIRED, ALPHASPACE,
+        MIN 3, MAX 32; logo STORAGE tenant-logo (optional)'
+      operationId: tenant-update
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Tenant Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateTenantRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tenant updated successfully. Available code (UPDATED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "400":
+          description: Bad Request - invalid input data. Available code (VALIDATION_ERROR,
+            BAD_REQUEST)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerValidationResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "422":
+          description: Tenant not found. Available code (TENANT_NOT_FOUND)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Update Tenant
+      tags:
+      - Tenant
+  /tenant/{id}/status/{status}:
+    post:
+      description: 'Update tenant status (active, inactive, suspended). Validation:
+        status must be one of active, inactive, suspended'
+      operationId: tenant-update-status
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Status
+        enum:
+        - active
+        - inactive
+        - suspended
+        in: path
+        name: status
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tenant status updated successfully. Available code (UPDATED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "400":
+          description: Bad Request - invalid status. Available code (INVALID_PATH,
+            VALIDATION_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "422":
+          description: Tenant has same status. Available code (TENANT_HAS_SAME_STATUS)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Update Tenant Status
+      tags:
+      - Tenant
   /user:
     get:
       description: Get list of users with pagination and search

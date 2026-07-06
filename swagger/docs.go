@@ -782,6 +782,377 @@ const docTemplate = `{
                 }
             }
         },
+        "/tenant": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Get list of tenants with pagination and search",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tenant"
+                ],
+                "summary": "List Tenants",
+                "operationId": "tenant-list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search by name (min 3 chars)",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "id",
+                            "created_at",
+                            "name"
+                        ],
+                        "type": "string",
+                        "default": "id",
+                        "description": "Order by field",
+                        "name": "order_by",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "desc",
+                        "description": "Sort direction",
+                        "name": "sort_by",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tenants fetched successfully. Available code (LIST_FETCHED)",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BasePaginationSwaggerResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.ListTenantResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Create a new tenant. Validation: name REQUIRED, ALPHASPACE, MIN 3, MAX 32; logo REQUIRED, STORAGE tenant-logo",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tenant"
+                ],
+                "summary": "Create Tenant",
+                "operationId": "tenant-create",
+                "parameters": [
+                    {
+                        "description": "Create Tenant Payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreateTenantRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Tenant created successfully. Available code (CREATED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - invalid input data. Available code (VALIDATION_ERROR, BAD_REQUEST)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tenant/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Get tenant detail by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tenant"
+                ],
+                "summary": "Get Tenant Detail",
+                "operationId": "tenant-detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tenant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tenant detail fetched successfully. Available code (DETAIL_FETCHED)",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BaseSwaggerResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.DetailTenantResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - invalid ID. Available code (INVALID_PARAM_ID)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Tenant not found. Available code (TENANT_NOT_FOUND)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Update tenant name and logo. Validation: name REQUIRED, ALPHASPACE, MIN 3, MAX 32; logo STORAGE tenant-logo (optional)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tenant"
+                ],
+                "summary": "Update Tenant",
+                "operationId": "tenant-update",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tenant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Tenant Payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateTenantRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tenant updated successfully. Available code (UPDATED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - invalid input data. Available code (VALIDATION_ERROR, BAD_REQUEST)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Tenant not found. Available code (TENANT_NOT_FOUND)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tenant/{id}/status/{status}": {
+            "post": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Update tenant status (active, inactive, suspended). Validation: status must be one of active, inactive, suspended",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tenant"
+                ],
+                "summary": "Update Tenant Status",
+                "operationId": "tenant-update-status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tenant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "active",
+                            "inactive",
+                            "suspended"
+                        ],
+                        "type": "string",
+                        "description": "Status",
+                        "name": "status",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tenant status updated successfully. Available code (UPDATED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - invalid status. Available code (INVALID_PATH, VALIDATION_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Tenant has same status. Available code (TENANT_HAS_SAME_STATUS)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/user": {
             "get": {
                 "security": [
@@ -1288,6 +1659,19 @@ const docTemplate = `{
                 "StorageTypeTenantLogo"
             ]
         },
+        "entity.TenantStatus": {
+            "type": "string",
+            "enum": [
+                "active",
+                "inactive",
+                "suspended"
+            ],
+            "x-enum-varnames": [
+                "TenantStatusActive",
+                "TenantStatusInactive",
+                "TenantStatusSuspended"
+            ]
+        },
         "entity.UserStatus": {
             "type": "string",
             "enum": [
@@ -1300,6 +1684,25 @@ const docTemplate = `{
                 "UserStatusInactive",
                 "UserStatusBanned"
             ]
+        },
+        "request.CreateTenantRequest": {
+            "type": "object",
+            "required": [
+                "logo",
+                "name"
+            ],
+            "properties": {
+                "logo": {
+                    "type": "string",
+                    "example": "temp/tenant/logo/123e4567-e89b-12d3-a456-426614174000.png"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 3,
+                    "example": "My Tenant"
+                }
+            }
         },
         "request.CreateUpdateRoleRequest": {
             "type": "object",
@@ -1384,6 +1787,24 @@ const docTemplate = `{
                         }
                     ],
                     "example": "avatar"
+                }
+            }
+        },
+        "request.UpdateTenantRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "logo": {
+                    "type": "string",
+                    "example": "temp/tenant/logo/123e4567-e89b-12d3-a456-426614174000.png"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 3,
+                    "example": "My Tenant"
                 }
             }
         },
@@ -1576,6 +1997,39 @@ const docTemplate = `{
                 }
             }
         },
+        "response.DetailTenantResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "logo": {
+                    "type": "string",
+                    "example": "tenant/logo/uuid.png"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "My Tenant"
+                },
+                "status": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.TenantStatus"
+                        }
+                    ],
+                    "example": "active"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                }
+            }
+        },
         "response.DetailUserResponse": {
             "type": "object",
             "properties": {
@@ -1668,6 +2122,31 @@ const docTemplate = `{
                 "total_user": {
                     "type": "integer",
                     "example": 10
+                }
+            }
+        },
+        "response.ListTenantResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "logo": {
+                    "type": "string",
+                    "example": "tenant/logo/uuid.png"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "My Tenant"
+                },
+                "status": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.TenantStatus"
+                        }
+                    ],
+                    "example": "active"
                 }
             }
         },

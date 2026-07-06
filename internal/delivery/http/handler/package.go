@@ -8,6 +8,7 @@ var Package = do.Package(
 	do.Lazy(NewUserMeHandler),
 	do.Lazy(NewUserHandler),
 	do.Lazy(NewRoleHandler),
+	do.Lazy(NewTenantHandler),
 	do.Lazy(NewPermissionHandler),
 	do.Lazy(NewStorageHandler),
 )

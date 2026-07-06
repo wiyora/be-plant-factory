@@ -27,10 +27,23 @@ type StorageConfig struct {
 	MaxPresigned time.Duration
 }
 
+type StorageMove struct {
+	From string
+	To   string
+}
+
 type StorageDiff struct {
-	Added   []string
+	Added   StorageMove
+	Removed string
+	Result  string
+	IsValid bool
+}
+
+type StorageDiffs struct {
+	Added   []StorageMove
 	Removed []string
-	Current []string
+	Result  []string
+	IsValid bool
 }
 
 var (
@@ -59,6 +72,8 @@ var (
 		StorageTypeAvatar,
 		StorageTypeTenantLogo,
 	}
+
+	tempPrefix = "temp/"
 )
 
 func (s StorageType) Config() (StorageConfig, bool) {
@@ -83,21 +98,49 @@ func (s StorageType) TempPath() string {
 	if path == "" {
 		return ""
 	}
-	return fmt.Sprintf("temp/%s", path)
+	return tempPrefix + path
 }
 
-func (s StorageType) IsValidFile(files ...string) bool {
-	cfg, ok := s.Config()
-	if !ok || len(files) == 0 {
+func (s StorageType) IsValidFile(file string) bool {
+	if file == "" {
 		return false
 	}
 
-	basePath := s.Path()
-	tempPath := s.TempPath()
+	cfg, ok := s.Config()
+	if !ok {
+		return false
+	}
+
+	ext := filepath.Ext(file)
+	if !cfg.Extension.Contains(ext) {
+		return false
+	}
+
+	baseName := filepath.Base(file)
+	uuidPart := baseName[:len(baseName)-len(ext)]
+	if _, err := uuid.Parse(uuidPart); err != nil {
+		return false
+	}
+
+	dir := filepath.Dir(file)
+	return dir == cfg.Path || dir == (tempPrefix+cfg.Path)
+}
+
+func (s StorageType) IsValidFiles(files ...string) bool {
+	if len(files) == 0 {
+		return false
+	}
+
+	cfg, ok := s.Config()
+	if !ok {
+		return false
+	}
+
+	basePath := cfg.Path
+	tempPath := tempPrefix + basePath
 
 	for _, file := range files {
-		dir := filepath.Dir(file)
-		if dir != basePath && dir != tempPath {
+		if file == "" {
 			return false
 		}
 
@@ -107,9 +150,13 @@ func (s StorageType) IsValidFile(files ...string) bool {
 		}
 
 		baseName := filepath.Base(file)
-		uuidPart := strings.TrimSuffix(baseName, ext)
-
+		uuidPart := baseName[:len(baseName)-len(ext)]
 		if _, err := uuid.Parse(uuidPart); err != nil {
+			return false
+		}
+
+		dir := filepath.Dir(file)
+		if dir != basePath && dir != tempPath {
 			return false
 		}
 	}
@@ -117,16 +164,149 @@ func (s StorageType) IsValidFile(files ...string) bool {
 	return true
 }
 
-func (s StorageType) Diff(oldFiles []string, newFiles []string) StorageDiff {
-	oldSet := mapset.NewSet(oldFiles...)
-	newSet := mapset.NewSet(newFiles...)
-
-	// TODO: check added and move from temp to original path
-	return StorageDiff{
-		Added:   newSet.Difference(oldSet).ToSlice(),
-		Removed: oldSet.Difference(newSet).ToSlice(),
-		Current: oldSet.Intersect(newSet).ToSlice(),
+func (s StorageType) Diff(oldFile string, newFile string) StorageDiff {
+	if oldFile != "" && !s.IsValidFile(oldFile) {
+		return StorageDiff{
+			IsValid: false,
+		}
 	}
+
+	if newFile != "" && !s.IsValidFile(newFile) {
+		return StorageDiff{
+			IsValid: false,
+		}
+	}
+
+	if newFile == "" || newFile == oldFile {
+		return StorageDiff{
+			Result:  oldFile,
+			IsValid: true,
+		}
+	}
+
+	basePathPrefix := s.Path()
+	if strings.HasPrefix(newFile, basePathPrefix) {
+		return StorageDiff{
+			Result:  oldFile,
+			IsValid: false,
+		}
+	}
+
+	tempPathPrefix := tempPrefix + basePathPrefix
+	if strings.HasPrefix(newFile, tempPathPrefix) {
+		finalDestination := newFile[len(tempPrefix):]
+		return StorageDiff{
+			Added: StorageMove{
+				From: newFile,
+				To:   finalDestination,
+			},
+			Removed: oldFile,
+			Result:  finalDestination,
+			IsValid: true,
+		}
+	}
+
+	return StorageDiff{
+		IsValid: false,
+	}
+}
+
+func (s StorageType) Diffs(oldFiles []string, newFiles []string) StorageDiffs {
+	diffs := StorageDiffs{
+		Added:   []StorageMove{},
+		Removed: []string{},
+		Result:  []string{},
+		IsValid: true,
+	}
+
+	oldFileSet := mapset.NewSet[string]()
+	validOldCount := 0
+	for _, file := range oldFiles {
+		if file != "" {
+			if !s.IsValidFile(file) {
+				return StorageDiffs{
+					IsValid: false,
+				}
+			}
+			oldFileSet.Add(file)
+			validOldCount++
+		}
+	}
+
+	newFileSet := mapset.NewSet[string]()
+	validNewCount := 0
+	for _, file := range newFiles {
+		if file != "" {
+			if !s.IsValidFile(file) {
+				return StorageDiffs{
+					IsValid: false,
+				}
+			}
+			newFileSet.Add(file)
+			validNewCount++
+		}
+	}
+
+	if validNewCount == 0 {
+		if validOldCount > 0 {
+			diffs.Result = make([]string, 0, validOldCount)
+			oldFileSet.Each(func(file string) bool {
+				diffs.Result = append(diffs.Result, file)
+				return false
+			})
+		}
+		return diffs
+	}
+
+	basePathPrefix := s.Path()
+	tempPathPrefix := tempPrefix + basePathPrefix
+
+	diffs.Added = make([]StorageMove, 0, validNewCount)
+	diffs.Result = make([]string, 0, validNewCount)
+
+	var iterErr bool
+	newFileSet.Each(func(newFile string) bool {
+		if strings.HasPrefix(newFile, basePathPrefix) {
+			if oldFileSet.Contains(newFile) {
+				diffs.Result = append(diffs.Result, newFile)
+				oldFileSet.Remove(newFile)
+				return false
+			}
+
+			iterErr = true
+			return true
+		}
+
+		if strings.HasPrefix(newFile, tempPathPrefix) {
+			finalDestination := newFile[len(tempPrefix):]
+			diffs.Added = append(diffs.Added, StorageMove{
+				From: newFile,
+				To:   finalDestination,
+			})
+
+			diffs.Result = append(diffs.Result, finalDestination)
+			return false
+		}
+
+		iterErr = true
+		return true
+	})
+
+	if iterErr {
+		return StorageDiffs{
+			IsValid: false,
+		}
+	}
+
+	if oldFileSet.Cardinality() > 0 {
+		diffs.Removed = make([]string, 0, oldFileSet.Cardinality())
+		oldFileSet.Each(func(oldFile string) bool {
+			diffs.Removed = append(diffs.Removed, oldFile)
+			return false
+		})
+	}
+
+	return diffs
 }
 
 func (s StorageType) NewFile(extension string) string {
@@ -140,7 +320,7 @@ func (s StorageType) NewFile(extension string) string {
 func (s StorageType) NewTempFile(extension string) string {
 	newFile := s.NewFile(extension)
 	if newFile != "" {
-		return fmt.Sprintf("temp/%s", newFile)
+		return tempPrefix + newFile
 	}
 
 	return ""
