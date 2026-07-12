@@ -2,6 +2,7 @@ package infrastructure
 
 import (
 	"github.com/rizalarfiyan/be-plant-factory/internal/infrastructure/jwt"
+	mqttInfra "github.com/rizalarfiyan/be-plant-factory/internal/infrastructure/mqtt"
 	"github.com/rizalarfiyan/be-plant-factory/internal/infrastructure/postgres"
 	"github.com/rizalarfiyan/be-plant-factory/internal/infrastructure/redis"
 	s3client "github.com/rizalarfiyan/be-plant-factory/internal/infrastructure/s3client"
@@ -19,4 +20,5 @@ var Package = do.Package(
 	do.Lazy(social.New),
 	do.Lazy(s3client.New),
 	do.Lazy(scheduler.New),
+	do.Lazy(mqttInfra.New),
 )

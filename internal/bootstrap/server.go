@@ -12,6 +12,7 @@ import (
 	httpError "github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/error"
 	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/middleware"
 	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/route"
+	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/websocket"
 	"github.com/rizalarfiyan/be-plant-factory/internal/infrastructure/logger"
 	"github.com/rizalarfiyan/be-plant-factory/internal/infrastructure/scheduler"
 	"github.com/rizalarfiyan/be-plant-factory/internal/infrastructure/validator"
@@ -36,6 +37,7 @@ func NewServer(i do.Injector) (*Server, error) {
 	validate := do.MustInvoke[*validator.Validate](i)
 	scheduler := do.MustInvoke[scheduler.Scheduler](i)
 	cron := do.MustInvoke[cron.Cron](i)
+	socketHandler := do.MustInvoke[websocket.SocketHandler](i)
 
 	log := logger.WithLayer(rawLog, logger.LayerHttp)
 
@@ -73,6 +75,9 @@ func NewServer(i do.Injector) (*Server, error) {
 
 	log.Info().Msg("Registering http server routes")
 	route.Register(app)
+
+	log.Info().Msg("Registering websocket routes")
+	websocket.Register(app, socketHandler)
 
 	return &Server{
 		conf:      conf,

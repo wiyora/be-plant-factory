@@ -31,6 +31,7 @@ type Config struct {
 	Swagger  SwaggerConfig  `env:"SWAGGER"`
 	Frontend FrontendConfig `env:"FRONTEND"`
 	S3       S3Config       `env:"S3"`
+	MQTT     MQTTConfig     `env:"MQTT"`
 }
 
 type Loader interface {

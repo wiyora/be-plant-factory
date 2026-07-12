@@ -3,7 +3,9 @@
         "gocron",
         "healthcheck",
         "mapset",
+        "mqtt",
         "Presign",
-        "rustfs"
+        "rustfs",
+        "socketio"
     ]
 }

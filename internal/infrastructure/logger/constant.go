@@ -11,6 +11,8 @@ const (
 	LayerS3        Layer = "s3"
 	LayerHttp      Layer = "http"
 	LayerScheduler Layer = "scheduler"
+	LayerMQTT      Layer = "mqtt"
+	LayerSocketIO  Layer = "socket_io"
 
 	LayerHTTPServer         Layer = "http_server"
 	LayerMiddleware         Layer = "middleware"
