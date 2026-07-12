@@ -61,7 +61,7 @@ func (r tenantRepository) List(ctx context.Context, req entity.TenantFilter) ([]
 
 	query := pgq.Select("id", "name", "logo", "status").From("tenants")
 	query = r.listFilters(query, req)
-	query = query.OrderBy(req.Order.String()).Limit(req.Pagination.Limit).Offset(req.Pagination.Offset())
+	query = query.OrderBy(req.Order.String()).Limit(req.Pagination.PageSize).Offset(req.Pagination.Offset())
 
 	sql, args, err := query.SQL()
 	if err != nil {

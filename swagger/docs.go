@@ -2157,6 +2157,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "avatar: coding"
                 },
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                },
                 "email": {
                     "type": "string",
                     "example": "rizalarfiyan@plant-factory.com"
@@ -2215,13 +2219,13 @@ const docTemplate = `{
         "response.PaginationSwaggerResponse": {
             "type": "object",
             "properties": {
-                "limit": {
-                    "type": "integer",
-                    "example": 10
-                },
                 "page": {
                     "type": "integer",
                     "example": 1
+                },
+                "page_size": {
+                    "type": "integer",
+                    "example": 10
                 },
                 "total": {
                     "type": "integer",

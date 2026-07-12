@@ -36,20 +36,22 @@ func (u User) ToEntity() entity.User {
 }
 
 type ListUser struct {
-	ID     uuid.UUID         `db:"id"`
-	Email  string            `db:"email"`
-	Name   string            `db:"name"`
-	Avatar string            `db:"avatar"`
-	Status entity.UserStatus `db:"status"`
+	ID        uuid.UUID         `db:"id"`
+	Email     string            `db:"email"`
+	Name      string            `db:"name"`
+	Avatar    string            `db:"avatar"`
+	Status    entity.UserStatus `db:"status"`
+	CreatedAt time.Time         `db:"created_at"`
 }
 
 func (u ListUser) ToEntity() entity.User {
 	return entity.User{
-		ID:     u.ID,
-		Email:  u.Email,
-		Name:   u.Name,
-		Avatar: u.Avatar,
-		Status: u.Status,
+		ID:        u.ID,
+		Email:     u.Email,
+		Name:      u.Name,
+		Avatar:    u.Avatar,
+		Status:    u.Status,
+		CreatedAt: u.CreatedAt,
 	}
 }
 

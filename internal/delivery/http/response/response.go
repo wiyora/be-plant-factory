@@ -34,7 +34,7 @@ type MessageResponse struct {
 
 type PaginationResponse struct {
 	Page       uint64 `json:"page"`
-	Limit      uint64 `json:"limit"`
+	PageSize   uint64 `json:"page_size"`
 	Total      uint64 `json:"total"`
 	TotalPages uint64 `json:"total_pages"`
 }
@@ -68,7 +68,7 @@ func WithPagination(pagination entity.PaginationResult) Option {
 	return func(r *responseConfig) {
 		r.res.Pagination = &PaginationResponse{
 			Page:       pagination.Page,
-			Limit:      pagination.Limit,
+			PageSize:   pagination.PageSize,
 			Total:      pagination.Total,
 			TotalPages: pagination.TotalPages,
 		}

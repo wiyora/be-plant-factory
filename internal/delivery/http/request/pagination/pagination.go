@@ -12,50 +12,50 @@ type Parser func(c fiber.Ctx) (entity.Pagination, error)
 type Option func(*config)
 
 type config struct {
-	keyPage      string
-	keyLimit     string
-	defaultPage  uint64
-	defaultLimit uint64
-	maxLimit     uint64
+	keyPage         string
+	keyPageSize     string
+	defaultPage     uint64
+	defaultPageSize uint64
+	maxPageSize     uint64
 }
 
-func WithKeys(pageKey, limitKey string) Option {
+func WithKeys(pageKey, pageSizeKey string) Option {
 	return func(c *config) {
 		if pageKey != "" {
 			c.keyPage = pageKey
 		}
-		if limitKey != "" {
-			c.keyLimit = limitKey
+		if pageSizeKey != "" {
+			c.keyPageSize = pageSizeKey
 		}
 	}
 }
 
-func WithDefaults(page, limit uint64) Option {
+func WithDefaults(page, pageSize uint64) Option {
 	return func(c *config) {
 		if page > 0 {
 			c.defaultPage = page
 		}
-		if limit > 0 {
-			c.defaultLimit = limit
+		if pageSize > 0 {
+			c.defaultPageSize = pageSize
 		}
 	}
 }
 
-func WithMaxLimit(max uint64) Option {
+func WithMaxPageSize(max uint64) Option {
 	return func(c *config) {
 		if max > 0 {
-			c.maxLimit = max
+			c.maxPageSize = max
 		}
 	}
 }
 
 func Parse(opts ...Option) Parser {
 	cfg := config{
-		keyPage:      "page",
-		keyLimit:     "limit",
-		defaultPage:  1,
-		defaultLimit: 10,
-		maxLimit:     50,
+		keyPage:         "page",
+		keyPageSize:     "page_size",
+		defaultPage:     1,
+		defaultPageSize: 10,
+		maxPageSize:     50,
 	}
 
 	for _, opt := range opts {
@@ -64,7 +64,7 @@ func Parse(opts ...Option) Parser {
 
 	return func(c fiber.Ctx) (entity.Pagination, error) {
 		page := fiber.Query(c, cfg.keyPage, cfg.defaultPage)
-		limit := fiber.Query(c, cfg.keyLimit, cfg.defaultLimit)
+		pageSize := fiber.Query(c, cfg.keyPageSize, cfg.defaultPageSize)
 
 		if page <= 0 {
 			return entity.Pagination{}, domainError.New(code.InvalidPageQuery, domainError.WithParams(map[string]any{
@@ -73,16 +73,16 @@ func Parse(opts ...Option) Parser {
 			}))
 		}
 
-		if limit <= 0 || limit > cfg.maxLimit {
+		if pageSize <= 0 || pageSize > cfg.maxPageSize {
 			return entity.Pagination{}, domainError.New(code.InvalidLimitQuery, domainError.WithParams(map[string]any{
-				"value": limit,
-				"key":   cfg.keyLimit,
+				"value": pageSize,
+				"key":   cfg.keyPageSize,
 			}))
 		}
 
 		return entity.Pagination{
-			Page:  page,
-			Limit: limit,
+			Page:     page,
+			PageSize: pageSize,
 		}, nil
 	}
 }

@@ -38,7 +38,7 @@ type BasePaginationSwaggerResponse struct {
 
 type PaginationSwaggerResponse struct {
 	Page       uint64 `json:"page" example:"1"`
-	Limit      uint64 `json:"limit" example:"10"`
+	PageSize   uint64 `json:"page_size" example:"10"`
 	Total      uint64 `json:"total" example:"100"`
 	TotalPages uint64 `json:"total_pages" example:"10"`
 }

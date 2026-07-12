@@ -140,9 +140,9 @@ func (r userRepository) List(ctx context.Context, req entity.UserFilter) ([]List
 		return nil, 0, err
 	}
 
-	query := pgq.Select("id", "email", "name", "avatar", "status").From("users")
+	query := pgq.Select("id", "email", "name", "avatar", "status", "created_at").From("users")
 	query = r.listFilters(query, req)
-	query = query.OrderBy(req.Order.String()).Limit(req.Pagination.Limit).Offset(req.Pagination.Offset())
+	query = query.OrderBy(req.Order.String()).Limit(req.Pagination.PageSize).Offset(req.Pagination.Offset())
 
 	sql, args, err := query.SQL()
 	if err != nil {

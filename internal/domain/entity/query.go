@@ -7,8 +7,8 @@ import (
 
 // Pagination
 type Pagination struct {
-	Page  uint64
-	Limit uint64
+	Page     uint64
+	PageSize uint64
 }
 
 func (p Pagination) Offset() uint64 {
@@ -16,15 +16,15 @@ func (p Pagination) Offset() uint64 {
 		return 0
 	}
 
-	return (p.Page - 1) * p.Limit
+	return (p.Page - 1) * p.PageSize
 }
 
 func (p Pagination) ToResult(total uint64) PaginationResult {
 	return PaginationResult{
 		Page:       p.Page,
-		Limit:      p.Limit,
+		PageSize:   p.PageSize,
 		Total:      total,
-		TotalPages: (total + p.Limit - 1) / p.Limit,
+		TotalPages: (total + p.PageSize - 1) / p.PageSize,
 	}
 }
 

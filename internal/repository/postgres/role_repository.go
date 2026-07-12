@@ -61,7 +61,7 @@ func (r roleRepository) List(ctx context.Context, req entity.RoleFilter) ([]List
 
 	subQuery := pgq.Select("id", "name", "total_permission").From("roles")
 	subQuery = r.listFilters(subQuery, req)
-	subQuery = subQuery.OrderBy(req.Order.String()).Limit(req.Pagination.Limit).Offset(req.Pagination.Offset())
+	subQuery = subQuery.OrderBy(req.Order.String()).Limit(req.Pagination.PageSize).Offset(req.Pagination.Offset())
 
 	query := pgq.Select("pr.id", "pr.name", "pr.total_permission", "sub.total_user").
 		FromSelect(subQuery, "pr").
