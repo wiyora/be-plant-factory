@@ -40,7 +40,7 @@ func NewRoleHandler(i do.Injector) (RoleHandler, error) {
 //	@Security		CookieAccessToken
 //	@Param			search		query		string																		false	"Search by name (min 3 chars)"
 //	@Param			page		query		int																			false	"Page number"		default(1)
-//	@Param			limit		query		int																			false	"Items per page"	default(10)
+//	@Param			page_size	query		int																			false	"Items per page"	default(10)
 //	@Param			order_by	query		string																		false	"Order by field"	default(id)		enums(id, name, created_at, total_permission)
 //	@Param			sort_by		query		string																		false	"Sort direction"	default(desc)	enums(asc, desc)
 //	@Success		200			{object}	response.BasePaginationSwaggerResponse{data=[]response.ListRoleResponse}	"Roles fetched successfully. Available code (LIST_FETCHED)"

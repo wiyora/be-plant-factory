@@ -14,7 +14,7 @@ var (
 
 	InvalidPath               = AppCode{"INVALID_PATH", fiber.StatusBadRequest}
 	InvalidPageQuery          = AppCode{"INVALID_PAGE_QUERY", fiber.StatusBadRequest}
-	InvalidLimitQuery         = AppCode{"INVALID_LIMIT_QUERY", fiber.StatusBadRequest}
+	InvalidPageSizeQuery      = AppCode{"INVALID_PAGE_SIZE_QUERY", fiber.StatusBadRequest}
 	InvalidOrderByQuery       = AppCode{"INVALID_ORDER_BY_QUERY", fiber.StatusBadRequest}
 	InvalidSortByQuery        = AppCode{"INVALID_SORT_BY_QUERY", fiber.StatusBadRequest}
 	InvalidMinimalSearchQuery = AppCode{"INVALID_MINIMAL_SEARCH_QUERY", fiber.StatusBadRequest}

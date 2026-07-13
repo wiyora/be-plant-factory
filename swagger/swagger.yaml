@@ -739,7 +739,7 @@ paths:
       - default: 10
         description: Items per page
         in: query
-        name: limit
+        name: page_size
         type: integer
       - default: id
         description: Order by field
@@ -1022,7 +1022,7 @@ paths:
       - default: 10
         description: Items per page
         in: query
-        name: limit
+        name: page_size
         type: integer
       - default: id
         description: Order by field
@@ -1266,7 +1266,7 @@ paths:
       - default: 10
         description: Items per page
         in: query
-        name: limit
+        name: page_size
         type: integer
       - default: id
         description: Order by field

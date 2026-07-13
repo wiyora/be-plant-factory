@@ -74,7 +74,7 @@ func Parse(opts ...Option) Parser {
 		}
 
 		if pageSize <= 0 || pageSize > cfg.maxPageSize {
-			return entity.Pagination{}, domainError.New(code.InvalidLimitQuery, domainError.WithParams(map[string]any{
+			return entity.Pagination{}, domainError.New(code.InvalidPageSizeQuery, domainError.WithParams(map[string]any{
 				"value": pageSize,
 				"key":   cfg.keyPageSize,
 			}))

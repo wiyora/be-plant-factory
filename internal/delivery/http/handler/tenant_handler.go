@@ -42,7 +42,7 @@ func NewTenantHandler(i do.Injector) (TenantHandler, error) {
 //	@Security		CookieAccessToken
 //	@Param			search		query		string																		false	"Search by name (min 3 chars)"
 //	@Param			page		query		int																			false	"Page number"		default(1)
-//	@Param			limit		query		int																			false	"Items per page"	default(10)
+//	@Param			page_size	query		int																			false	"Items per page"	default(10)
 //	@Param			order_by	query		string																		false	"Order by field"	default(id)		enums(id, created_at, name)
 //	@Param			sort_by		query		string																		false	"Sort direction"	default(desc)	enums(asc, desc)
 //	@Success		200			{object}	response.BasePaginationSwaggerResponse{data=[]response.ListTenantResponse}	"Tenants fetched successfully. Available code (LIST_FETCHED)"

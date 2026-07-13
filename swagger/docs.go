@@ -382,7 +382,7 @@ const docTemplate = `{
                         "type": "integer",
                         "default": 10,
                         "description": "Items per page",
-                        "name": "limit",
+                        "name": "page_size",
                         "in": "query"
                     },
                     {
@@ -816,7 +816,7 @@ const docTemplate = `{
                         "type": "integer",
                         "default": 10,
                         "description": "Items per page",
-                        "name": "limit",
+                        "name": "page_size",
                         "in": "query"
                     },
                     {
@@ -1187,7 +1187,7 @@ const docTemplate = `{
                         "type": "integer",
                         "default": 10,
                         "description": "Items per page",
-                        "name": "limit",
+                        "name": "page_size",
                         "in": "query"
                     },
                     {
