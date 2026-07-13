@@ -41,4 +41,5 @@ type TenantFilter struct {
 	Search     Search
 	Pagination Pagination
 	Order      Order
+	Status     TenantStatus
 }

@@ -59,7 +59,7 @@ func (r tenantRepository) List(ctx context.Context, req entity.TenantFilter) ([]
 		return nil, 0, err
 	}
 
-	query := pgq.Select("id", "name", "logo", "status").From("tenants")
+	query := pgq.Select("id", "name", "logo", "status", "created_at").From("tenants")
 	query = r.listFilters(query, req)
 	query = query.OrderBy(req.Order.String()).Limit(req.Pagination.PageSize).Offset(req.Pagination.Offset())
 
@@ -90,6 +90,10 @@ func (r tenantRepository) List(ctx context.Context, req entity.TenantFilter) ([]
 }
 
 func (r tenantRepository) listFilters(query pgq.SelectBuilder, req entity.TenantFilter) pgq.SelectBuilder {
+	if req.Status.Valid() {
+		query = query.Where("status = ?", req.Status)
+	}
+
 	if req.Search.HasSearch() {
 		query = query.Where("name % ?", req.Search)
 	}

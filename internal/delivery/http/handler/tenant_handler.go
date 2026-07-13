@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/request"
+	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/request/filter"
 	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/request/pagination"
 	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/request/search"
 	"github.com/rizalarfiyan/be-plant-factory/internal/delivery/http/request/sorting"
@@ -65,6 +66,7 @@ func (h tenantHandler) List(c fiber.Ctx) error {
 					"name":       "name",
 				}),
 			)),
+		helper.QueryField(&req.Status, filter.ParseEnum[entity.TenantStatus]("status")),
 	)
 	if err != nil {
 		return err

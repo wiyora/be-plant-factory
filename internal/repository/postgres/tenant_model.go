@@ -28,17 +28,19 @@ func (t Tenant) ToEntity() entity.Tenant {
 }
 
 type ListTenant struct {
-	ID     uuid.UUID           `db:"id"`
-	Name   string              `db:"name"`
-	Logo   string              `db:"logo"`
-	Status entity.TenantStatus `db:"status"`
+	ID        uuid.UUID           `db:"id"`
+	Name      string              `db:"name"`
+	Logo      string              `db:"logo"`
+	Status    entity.TenantStatus `db:"status"`
+	CreatedAt time.Time           `db:"created_at"`
 }
 
 func (t ListTenant) ToEntity() entity.Tenant {
 	return entity.Tenant{
-		ID:     t.ID,
-		Name:   t.Name,
-		Logo:   t.Logo,
-		Status: t.Status,
+		ID:        t.ID,
+		Name:      t.Name,
+		Logo:      t.Logo,
+		Status:    t.Status,
+		CreatedAt: t.CreatedAt,
 	}
 }
