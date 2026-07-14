@@ -17,6 +17,7 @@ var Package = do.Package(
 	do.Lazy(postgres.NewSessionRepository),
 	do.Lazy(postgres.NewRoleRepository),
 	do.Lazy(postgres.NewTenantRepository),
+	do.Lazy(postgres.NewUserTenantRepository),
 
 	// Redis repositories
 	do.Lazy(redis.NewCacheRepository),

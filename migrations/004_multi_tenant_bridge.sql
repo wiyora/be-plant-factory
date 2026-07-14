@@ -2,6 +2,8 @@ CREATE TABLE user_tenants (
 	user_id UUID REFERENCES users (id) ON DELETE CASCADE,
 	tenant_id UUID REFERENCES tenants (id) ON DELETE CASCADE,
 	role_id UUID REFERENCES roles (id),
+	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMPTZ,
 	PRIMARY KEY (user_id, tenant_id),
     UNIQUE (user_id, tenant_id),
     UNIQUE (user_id, tenant_id, role_id)

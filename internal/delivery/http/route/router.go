@@ -19,6 +19,7 @@ type router struct {
 	user       handler.UserHandler       `do:""`
 	role       handler.RoleHandler       `do:""`
 	tenant     handler.TenantHandler     `do:""`
+	userTenant handler.UserTenantHandler `do:""`
 	permission handler.PermissionHandler `do:""`
 	storage    handler.StorageHandler    `do:""`
 }
@@ -50,9 +51,10 @@ func (r *router) authRoute(route fiber.Router) {
 }
 
 func (r *router) userRoute(route fiber.Router) {
-	route.Get("", r.mid.Auth(), r.user.List)
+	route.Get("/", r.mid.Auth(), r.user.List)
 	route.Get("/:id", r.mid.Auth(), r.user.Detail)
-	route.Post("", r.mid.Auth(), r.user.Create)
+	route.Get("/:id/tenants", r.mid.Auth(), r.userTenant.ListUserTenants)
+	route.Post("/", r.mid.Auth(), r.user.Create)
 	route.Put("/:id", r.mid.Auth(), r.user.Update)
 	route.Post("/:id/status/:status", r.mid.Auth(), r.user.UpdateStatus)
 }
@@ -70,10 +72,13 @@ func (r *router) roleRoute(route fiber.Router) {
 }
 
 func (r *router) tenantRoute(route fiber.Router) {
-	route.Get("", r.mid.Auth(), r.tenant.List)
+	route.Get("/", r.mid.Auth(), r.tenant.List)
 	route.Get("/:id", r.mid.Auth(), r.tenant.Detail)
-	route.Post("", r.mid.Auth(), r.tenant.Create)
+	route.Get("/:id/users", r.mid.Auth(), r.userTenant.ListTenantUsers)
+	route.Post("/", r.mid.Auth(), r.tenant.Create)
 	route.Put("/:id", r.mid.Auth(), r.tenant.Update)
+	route.Put("/:id/users/:user_id", r.mid.Auth(), r.userTenant.AssignUserRole)
+	route.Delete("/:id/users/:user_id", r.mid.Auth(), r.userTenant.RemoveTenantUser)
 	route.Post("/:id/status/:status", r.mid.Auth(), r.tenant.UpdateStatus)
 }
 
