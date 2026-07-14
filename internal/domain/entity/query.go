@@ -3,6 +3,8 @@ package entity
 import (
 	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // Pagination
@@ -65,4 +67,17 @@ type DateRange struct {
 
 func (d DateRange) IsEmpty() bool {
 	return d.Start.IsZero() && d.End.IsZero()
+}
+
+// DropdownFilter
+type DropdownFilter struct {
+	Search     Search
+	Pagination Pagination
+	ActiveIDs  []uuid.UUID
+}
+
+// DropdownItem
+type DropdownItem struct {
+	ID   uuid.UUID
+	Name string
 }

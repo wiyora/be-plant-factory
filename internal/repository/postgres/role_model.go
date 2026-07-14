@@ -42,3 +42,15 @@ type ListRole struct {
 	TotalPermission int       `db:"total_permission"`
 	TotalUser       int       `db:"total_user"`
 }
+
+type DropdownRole struct {
+	ID   uuid.UUID `db:"id"`
+	Name string    `db:"name"`
+}
+
+func (r DropdownRole) ToEntity() entity.DropdownItem {
+	return entity.DropdownItem{
+		ID:   r.ID,
+		Name: r.Name,
+	}
+}

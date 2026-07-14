@@ -32,6 +32,7 @@ func (r *router) Register(app *fiber.App) {
 	app.Get("/health", r.health.Check)
 
 	r.authRoute(app.Group("/auth"))
+	r.dropdownRoute(app)
 	r.userRoute(app.Group("/user"))
 	r.userMeRoute(app.Group("/user/me"))
 	r.roleRoute(app.Group("/role"))
@@ -88,4 +89,10 @@ func (r *router) permissionRoute(route fiber.Router) {
 
 func (r *router) storageRoute(route fiber.Router) {
 	route.Post("/presigned-upload", r.mid.Auth(), r.storage.PresignedUpload)
+}
+
+func (r *router) dropdownRoute(route fiber.Router) {
+	route.Get("/user/dropdown", r.mid.Auth(), r.user.Dropdown)
+	route.Get("/role/dropdown", r.mid.Auth(), r.role.Dropdown)
+	route.Get("/tenant/dropdown", r.mid.Auth(), r.tenant.Dropdown)
 }

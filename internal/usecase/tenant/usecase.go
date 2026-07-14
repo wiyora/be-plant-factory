@@ -16,6 +16,7 @@ type TenantUseCase interface {
 	Create(ctx context.Context, req entity.Tenant) error
 	Update(ctx context.Context, req entity.Tenant) error
 	UpdateStatus(ctx context.Context, id uuid.UUID, status entity.TenantStatus) error
+	Dropdown(ctx context.Context, filter entity.DropdownFilter) ([]entity.DropdownItem, uint64, error)
 }
 
 type tenantUseCase struct {

@@ -22,6 +22,7 @@ type UserHandler interface {
 	Create(c fiber.Ctx) error
 	Update(c fiber.Ctx) error
 	UpdateStatus(c fiber.Ctx) error
+	Dropdown(c fiber.Ctx) error
 }
 
 type userHandler struct {
@@ -179,6 +180,48 @@ func (h userHandler) Update(c fiber.Ctx) error {
 	}
 
 	return response.New(c, code.Updated)
+}
+
+// Dropdown godoc
+//
+//	@Summary		User Dropdown
+//	@Description	Get user dropdown with search, pagination, and active_ids
+//	@ID				user-dropdown
+//	@Tags			User
+//	@Produce		json
+//	@Security		CookieAccessToken
+//	@Param			search		query		string																		false	"Search by name (min 3 chars)"
+//	@Param			page		query		int																			false	"Page number"		default(1)
+//	@Param			page_size	query		int																			false	"Items per page"	default(10)
+//	@Param			active_ids	query		[]string																	false	"Active IDs"
+//	@Success		200			{object}	response.BasePaginationSwaggerResponse{data=[]response.DropdownResponse}	"Users fetched successfully. Available code (LIST_FETCHED)"
+//	@Failure		400			{object}	response.BaseSwaggerValidationResponse{}									"Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)"
+//	@Failure		401			{object}	response.BaseSwaggerEmptyResponse{}											"Unauthorized. Available code (UNAUTHORIZED)"
+//	@Failure		500			{object}	response.BaseSwaggerEmptyResponse{}											"Internal Server Error. Available code (INTERNAL_SERVER_ERROR)"
+//	@Router			/user/dropdown [get]
+func (h userHandler) Dropdown(c fiber.Ctx) error {
+	var req entity.DropdownFilter
+
+	err := helper.QueryBind(c,
+		helper.QueryField(&req.Search, search.Parse()),
+		helper.QueryField(&req.Pagination, pagination.Parse()),
+		helper.QueryField(&req.ActiveIDs, filter.ParseUUIDs("active_ids")),
+	)
+	if err != nil {
+		return err
+	}
+
+	items, total, err := h.useCase.Dropdown(c.Context(), req)
+	if err != nil {
+		return err
+	}
+
+	res := make([]response.DropdownResponse, len(items))
+	for i, item := range items {
+		res[i] = response.NewDropdownResponse(item)
+	}
+
+	return response.New(c, code.ListFetched, response.WithData(res), response.WithPagination(req.Pagination.ToResult(total)))
 }
 
 // UpdateStatus godoc

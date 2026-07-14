@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
+	"github.com/google/uuid"
 	"github.com/rizalarfiyan/be-plant-factory/internal/domain/entity"
 	domainError "github.com/rizalarfiyan/be-plant-factory/internal/domain/error"
 	"github.com/rizalarfiyan/be-plant-factory/internal/shared/code"
@@ -92,6 +93,18 @@ func New(c fiber.Ctx, code code.AppCode, opts ...Option) error {
 	}
 
 	return c.Status(r.httpCode).JSON(r.res)
+}
+
+type DropdownResponse struct {
+	Value uuid.UUID `json:"value" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Label string    `json:"label" example:"Admin"`
+}
+
+func NewDropdownResponse(item entity.DropdownItem) DropdownResponse {
+	return DropdownResponse{
+		Value: item.ID,
+		Label: item.Name,
+	}
 }
 
 func NewValidate(c fiber.Ctx, err error) error {

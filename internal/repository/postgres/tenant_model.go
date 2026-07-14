@@ -44,3 +44,15 @@ func (t ListTenant) ToEntity() entity.Tenant {
 		CreatedAt: t.CreatedAt,
 	}
 }
+
+type DropdownTenant struct {
+	ID   uuid.UUID `db:"id"`
+	Name string    `db:"name"`
+}
+
+func (t DropdownTenant) ToEntity() entity.DropdownItem {
+	return entity.DropdownItem{
+		ID:   t.ID,
+		Name: t.Name,
+	}
+}

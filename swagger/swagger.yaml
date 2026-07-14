@@ -358,6 +358,15 @@ definitions:
         example: "2024-01-01T00:00:00Z"
         type: string
     type: object
+  response.DropdownResponse:
+    properties:
+      label:
+        example: Admin
+        type: string
+      value:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
   response.HealthResponse:
     properties:
       environment:
@@ -1029,6 +1038,63 @@ paths:
       summary: Update Role
       tags:
       - Role
+  /role/dropdown:
+    get:
+      description: Get role dropdown with search, pagination, and active_ids
+      operationId: role-dropdown
+      parameters:
+      - description: Search by name (min 3 chars)
+        in: query
+        name: search
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: page_size
+        type: integer
+      - collectionFormat: csv
+        description: Active IDs
+        in: query
+        items:
+          type: string
+        name: active_ids
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Roles fetched successfully. Available code (LIST_FETCHED)
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BasePaginationSwaggerResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.DropdownResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerValidationResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Role Dropdown
+      tags:
+      - Role
   /storage/presigned-upload:
     post:
       consumes:
@@ -1097,8 +1163,9 @@ paths:
         description: Order by field
         enum:
         - id
-        - created_at
         - name
+        - created_at
+        - status
         in: query
         name: order_by
         type: string
@@ -1109,6 +1176,14 @@ paths:
         - desc
         in: query
         name: sort_by
+        type: string
+      - description: Filter by status
+        enum:
+        - active
+        - inactive
+        - suspended
+        in: query
+        name: status
         type: string
       produces:
       - application/json
@@ -1145,7 +1220,7 @@ paths:
       consumes:
       - application/json
       description: 'Create a new tenant. Validation: name REQUIRED, ALPHASPACE, MIN
-        3, MAX 32; logo REQUIRED, STORAGE tenant-logo'
+        3, MAX 32; logo STORAGE tenant-logo (optional)'
       operationId: tenant-create
       parameters:
       - description: Create Tenant Payload
@@ -1476,6 +1551,63 @@ paths:
       summary: Assign or Update User Role in Tenant
       tags:
       - Tenant User
+  /tenant/dropdown:
+    get:
+      description: Get tenant dropdown with search, pagination, and active_ids
+      operationId: tenant-dropdown
+      parameters:
+      - description: Search by name (min 3 chars)
+        in: query
+        name: search
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: page_size
+        type: integer
+      - collectionFormat: csv
+        description: Active IDs
+        in: query
+        items:
+          type: string
+        name: active_ids
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tenants fetched successfully. Available code (LIST_FETCHED)
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BasePaginationSwaggerResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.DropdownResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerValidationResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Tenant Dropdown
+      tags:
+      - Tenant
   /user:
     get:
       description: Get list of users with pagination and search
@@ -1808,6 +1940,63 @@ paths:
       summary: List User Tenants
       tags:
       - User Tenant
+  /user/dropdown:
+    get:
+      description: Get user dropdown with search, pagination, and active_ids
+      operationId: user-dropdown
+      parameters:
+      - description: Search by name (min 3 chars)
+        in: query
+        name: search
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: page_size
+        type: integer
+      - collectionFormat: csv
+        description: Active IDs
+        in: query
+        items:
+          type: string
+        name: active_ids
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Users fetched successfully. Available code (LIST_FETCHED)
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BasePaginationSwaggerResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.DropdownResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerValidationResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: User Dropdown
+      tags:
+      - User
   /user/me/getting-started:
     post:
       consumes:

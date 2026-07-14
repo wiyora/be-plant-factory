@@ -24,6 +24,7 @@ type UserRepository interface {
 	Create(ctx context.Context, user entity.User) error
 	Update(ctx context.Context, user entity.User) (bool, error)
 	UpdateStatus(ctx context.Context, id uuid.UUID, status entity.UserStatus) (bool, error)
+	Dropdown(ctx context.Context, req entity.DropdownFilter) ([]DropdownUser, uint64, error)
 }
 
 type userRepository struct {
@@ -236,4 +237,85 @@ func (r userRepository) UpdateStatus(ctx context.Context, id uuid.UUID, status e
 	}
 
 	return conn.RowsAffected() > 0, nil
+}
+
+func (r userRepository) dropdownFilters(query pgq.SelectBuilder, req entity.DropdownFilter) pgq.SelectBuilder {
+	hasActiveIDs := len(req.ActiveIDs) > 0
+	hasSearch := req.Search.HasSearch()
+
+	if hasActiveIDs && hasSearch {
+		query = query.Where("id = ANY(?) OR name % ?", req.ActiveIDs, req.Search)
+	} else if hasSearch {
+		query = query.Where("name % ?", req.Search)
+	}
+
+	return query
+}
+
+func (r userRepository) dropdownOrderBy(query pgq.SelectBuilder, req entity.DropdownFilter) pgq.SelectBuilder {
+	hasActiveIDs := len(req.ActiveIDs) > 0
+	hasSearch := req.Search.HasSearch()
+
+	if hasActiveIDs && hasSearch {
+		return query.OrderByClause("CASE WHEN id = ANY(?) THEN 0 ELSE 1 END, similarity(name, ?) DESC, name ASC", req.ActiveIDs, req.Search)
+	}
+
+	if hasActiveIDs {
+		return query.OrderByClause("CASE WHEN id = ANY(?) THEN 0 ELSE 1 END, name ASC", req.ActiveIDs)
+	}
+
+	if hasSearch {
+		return query.OrderByClause("similarity(name, ?) DESC, name ASC", req.Search)
+	}
+
+	return query.OrderBy("name ASC")
+}
+
+func (r userRepository) Dropdown(ctx context.Context, req entity.DropdownFilter) ([]DropdownUser, uint64, error) {
+	log := logger.WithLayerCtx(ctx, logger.LayerPostgresRepository)
+
+	countQuery := pgq.Select("COUNT(*)").From("users")
+	countQuery = r.dropdownFilters(countQuery, req)
+
+	countSQL, countArgs, err := countQuery.SQL()
+	if err != nil {
+		log.Error().Err(err).Msg("failed to build role dropdown count query")
+		return nil, 0, err
+	}
+
+	var total uint64
+	db := GetDB(ctx, r.db)
+	if err := db.QueryRow(ctx, countSQL, countArgs...).Scan(&total); err != nil {
+		log.Error().Err(err).Msg("failed to execute role dropdown count query")
+		return nil, 0, err
+	}
+
+	query := pgq.Select("id", "name").From("users")
+	query = r.dropdownFilters(query, req)
+	query = r.dropdownOrderBy(query, req)
+	query = query.Limit(req.Pagination.PageSize).Offset(req.Pagination.Offset())
+
+	sql, args, err := query.SQL()
+	if err != nil {
+		log.Error().Err(err).Msg("failed to build role dropdown query")
+		return nil, 0, err
+	}
+
+	rows, err := db.Query(ctx, sql, args...)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to execute role dropdown query")
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	items, err := pgx.CollectRows(rows, pgx.RowToStructByName[DropdownUser])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, total, nil
+		}
+		log.Error().Err(err).Msg("failed to scan role dropdown rows")
+		return nil, 0, err
+	}
+
+	return items, total, nil
 }

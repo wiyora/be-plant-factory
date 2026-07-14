@@ -60,3 +60,15 @@ type UpsertSocialUser struct {
 	CurrentStep entity.CurrentStep `db:"current_step"`
 	Status      entity.UserStatus  `db:"status"`
 }
+
+type DropdownUser struct {
+	ID   uuid.UUID `db:"id"`
+	Name string    `db:"name"`
+}
+
+func (u DropdownUser) ToEntity() entity.DropdownItem {
+	return entity.DropdownItem{
+		ID:   u.ID,
+		Name: u.Name,
+	}
+}

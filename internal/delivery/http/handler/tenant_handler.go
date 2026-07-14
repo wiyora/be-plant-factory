@@ -22,6 +22,7 @@ type TenantHandler interface {
 	Create(c fiber.Ctx) error
 	Update(c fiber.Ctx) error
 	UpdateStatus(c fiber.Ctx) error
+	Dropdown(c fiber.Ctx) error
 }
 
 type tenantHandler struct {
@@ -43,8 +44,9 @@ func NewTenantHandler(i do.Injector) (TenantHandler, error) {
 //	@Param			search		query		string																		false	"Search by name (min 3 chars)"
 //	@Param			page		query		int																			false	"Page number"		default(1)
 //	@Param			page_size	query		int																			false	"Items per page"	default(10)
-//	@Param			order_by	query		string																		false	"Order by field"	default(id)		enums(id, created_at, name)
+//	@Param			order_by	query		string																		false	"Order by field"	default(id)		enums(id, name, created_at, status)
 //	@Param			sort_by		query		string																		false	"Sort direction"	default(desc)	enums(asc, desc)
+//	@Param			status		query		string																		false	"Filter by status"	enums(active, inactive, suspended)
 //	@Success		200			{object}	response.BasePaginationSwaggerResponse{data=[]response.ListTenantResponse}	"Tenants fetched successfully. Available code (LIST_FETCHED)"
 //	@Failure		400			{object}	response.BaseSwaggerValidationResponse{}									"Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)"
 //	@Failure		401			{object}	response.BaseSwaggerEmptyResponse{}											"Unauthorized. Available code (UNAUTHORIZED)"
@@ -59,11 +61,12 @@ func (h tenantHandler) List(c fiber.Ctx) error {
 		helper.QueryField(&req.Order,
 			sorting.Parse(
 				sorting.WithDefaults("id", entity.Desc),
-				sorting.WithAllowedOrderBy("id", "created_at", "name"),
+				sorting.WithAllowedOrderBy("id", "name", "created_at", "status"),
 				sorting.WithMappingOrderBy(map[string]string{
 					"id":         "id",
-					"created_at": "id",
 					"name":       "name",
+					"created_at": "id",
+					"status":     "status",
 				}),
 			)),
 		helper.QueryField(&req.Status, filter.ParseEnum[entity.TenantStatus]("status")),
@@ -117,7 +120,7 @@ func (h tenantHandler) Detail(c fiber.Ctx) error {
 // Create godoc
 //
 //	@Summary		Create Tenant
-//	@Description	Create a new tenant. Validation: name REQUIRED, ALPHASPACE, MIN 3, MAX 32; logo REQUIRED, STORAGE tenant-logo
+//	@Description	Create a new tenant. Validation: name REQUIRED, ALPHASPACE, MIN 3, MAX 32; logo STORAGE tenant-logo (optional)
 //	@ID				tenant-create
 //	@Tags			Tenant
 //	@Accept			json
@@ -214,4 +217,46 @@ func (h tenantHandler) UpdateStatus(c fiber.Ctx) error {
 	}
 
 	return response.New(c, code.Updated)
+}
+
+// Dropdown godoc
+//
+//	@Summary		Tenant Dropdown
+//	@Description	Get tenant dropdown with search, pagination, and active_ids
+//	@ID				tenant-dropdown
+//	@Tags			Tenant
+//	@Produce		json
+//	@Security		CookieAccessToken
+//	@Param			search		query		string																		false	"Search by name (min 3 chars)"
+//	@Param			page		query		int																			false	"Page number"		default(1)
+//	@Param			page_size	query		int																			false	"Items per page"	default(10)
+//	@Param			active_ids	query		[]string																	false	"Active IDs"
+//	@Success		200			{object}	response.BasePaginationSwaggerResponse{data=[]response.DropdownResponse}	"Tenants fetched successfully. Available code (LIST_FETCHED)"
+//	@Failure		400			{object}	response.BaseSwaggerValidationResponse{}									"Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)"
+//	@Failure		401			{object}	response.BaseSwaggerEmptyResponse{}											"Unauthorized. Available code (UNAUTHORIZED)"
+//	@Failure		500			{object}	response.BaseSwaggerEmptyResponse{}											"Internal Server Error. Available code (INTERNAL_SERVER_ERROR)"
+//	@Router			/tenant/dropdown [get]
+func (h tenantHandler) Dropdown(c fiber.Ctx) error {
+	var req entity.DropdownFilter
+
+	err := helper.QueryBind(c,
+		helper.QueryField(&req.Search, search.Parse()),
+		helper.QueryField(&req.Pagination, pagination.Parse()),
+		helper.QueryField(&req.ActiveIDs, filter.ParseUUIDs("active_ids")),
+	)
+	if err != nil {
+		return err
+	}
+
+	items, total, err := h.useCase.Dropdown(c.Context(), req)
+	if err != nil {
+		return err
+	}
+
+	res := make([]response.DropdownResponse, len(items))
+	for i, item := range items {
+		res[i] = response.NewDropdownResponse(item)
+	}
+
+	return response.New(c, code.ListFetched, response.WithData(res), response.WithPagination(req.Pagination.ToResult(total)))
 }
