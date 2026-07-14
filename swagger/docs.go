@@ -571,6 +571,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
                     },
+                    "404": {
+                        "description": "Role not found. Available code (NOT_FOUND)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
                     "422": {
                         "description": "Role not found. Available code (ROLE_NOT_FOUND)",
                         "schema": {
@@ -998,8 +1004,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }
                     },
-                    "422": {
-                        "description": "Tenant not found. Available code (TENANT_NOT_FOUND)",
+                    "404": {
+                        "description": "Tenant not found. Available code (NOT_FOUND)",
                         "schema": {
                             "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
                         }

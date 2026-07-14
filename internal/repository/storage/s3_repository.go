@@ -155,7 +155,7 @@ func (r s3Repository) Diff(ctx context.Context, diff entity.StorageDiff) error {
 		return nil
 	}
 
-	if helper.IsEmptyStruct(diff.Added) {
+	if !helper.IsEmptyStruct(diff.Added) {
 		if err := r.Move(ctx, diff.Added.From, diff.Added.To); err != nil {
 			log.Error().Err(err).Interface("added", diff.Added).Msg("failed to process diff move operation")
 			return err

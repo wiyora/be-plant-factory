@@ -21,7 +21,7 @@ func (u roleUseCase) Detail(ctx context.Context, id uuid.UUID) (entity.Role, err
 	}
 
 	if helper.IsEmptyStruct(item) {
-		return entity.Role{}, domainError.New(code.RoleNotFound)
+		return entity.Role{}, domainError.New(code.NotFound)
 	}
 
 	return item.ToEntity(), nil

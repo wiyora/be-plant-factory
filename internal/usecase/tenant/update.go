@@ -20,14 +20,15 @@ func (u tenantUseCase) Update(ctx context.Context, req entity.Tenant) error {
 	}
 
 	if helper.IsEmptyStruct(existing) {
-		return domainError.New(code.NotFound)
+		return domainError.New(code.TenantNotFound)
 	}
 
-	diff := entity.StorageTypeAvatar.Diff(existing.Logo, req.Logo)
+	diff := entity.StorageTypeTenantLogo.Diff(existing.Logo, req.Logo)
 	if !diff.IsValid {
 		return domainError.NewManualValidation("logo", "INVALID")
 	}
 
+	req.Logo = diff.Result
 	isUpdated, err := u.tenantRepo.Update(ctx, req)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to update tenant")
@@ -35,7 +36,7 @@ func (u tenantUseCase) Update(ctx context.Context, req entity.Tenant) error {
 	}
 
 	if !isUpdated {
-		return domainError.New(code.NotFound)
+		return domainError.New(code.TenantNotFound)
 	}
 
 	if err := u.s3Repo.Diff(ctx, diff); err != nil {

@@ -95,6 +95,7 @@ func (h roleHandler) List(c fiber.Ctx) error {
 //	@Success		200	{object}	response.BaseSwaggerResponse{data=response.DetailRoleResponse}	"Role detail fetched successfully. Available code (DETAIL_FETCHED)"
 //	@Failure		400	{object}	response.BaseSwaggerEmptyResponse{}								"Bad Request - invalid ID. Available code (INVALID_PARAM_ID)"
 //	@Failure		401	{object}	response.BaseSwaggerEmptyResponse{}								"Unauthorized. Available code (UNAUTHORIZED)"
+//	@Failure		404	{object}	response.BaseSwaggerEmptyResponse{}								"Role not found. Available code (NOT_FOUND)"
 //	@Failure		422	{object}	response.BaseSwaggerEmptyResponse{}								"Role not found. Available code (ROLE_NOT_FOUND)"
 //	@Failure		500	{object}	response.BaseSwaggerEmptyResponse{}								"Internal Server Error. Available code (INTERNAL_SERVER_ERROR)"
 //	@Router			/role/{id} [get]

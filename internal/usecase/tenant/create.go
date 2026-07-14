@@ -11,11 +11,12 @@ import (
 func (u tenantUseCase) Create(ctx context.Context, req entity.Tenant) error {
 	log := logger.WithLayerCtx(ctx, logger.LayerUseCase)
 
-	diff := entity.StorageTypeAvatar.Diff("", req.Logo)
+	diff := entity.StorageTypeTenantLogo.Diff("", req.Logo)
 	if !diff.IsValid {
 		return domainError.NewManualValidation("logo", "INVALID")
 	}
 
+	req.Logo = diff.Result
 	err := u.tenantRepo.Create(ctx, req)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to create tenant")
