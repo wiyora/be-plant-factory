@@ -1522,7 +1522,7 @@ const docTemplate = `{
                     {
                         "enum": [
                             "id",
-                            "created_at",
+                            "assigned_date",
                             "name",
                             "email"
                         ],

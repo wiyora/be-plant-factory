@@ -67,15 +67,13 @@ func (r userTenantRepository) ListByTenant(ctx context.Context, req entity.Tenan
 		return nil, 0, err
 	}
 
-	filteredQuery := pgq.Select("ut.user_id", "ut.role_id", "ut.created_at").
-		From("user_tenants ut")
+	filteredQuery := pgq.Select("ut.user_id", "ut.role_id", "ut.created_at").From("user_tenants ut")
 	if req.Search.HasSearch() {
 		filteredQuery = filteredQuery.Join("users u ON ut.user_id = u.id")
 	}
+
 	filteredQuery = r.listByTenantFilters(filteredQuery, req)
-	filteredQuery = filteredQuery.OrderBy(req.Order.String()).
-		Limit(req.Pagination.PageSize).
-		Offset(req.Pagination.Offset())
+	filteredQuery = filteredQuery.Limit(req.Pagination.PageSize).Offset(req.Pagination.Offset())
 
 	mainQuery := pgq.Select(
 		"u.id as user_id",

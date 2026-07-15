@@ -42,8 +42,8 @@ func NewUserTenantHandler(i do.Injector) (UserTenantHandler, error) {
 //	@Param			page		query		int																				false	"Page"		default(1)
 //	@Param			page_size	query		int																				false	"Page Size"	default(10)
 //	@Param			search		query		string																			false	"Search by user name"
-//	@Param			order_by	query		string																			false	"Order by"	Enums(id, created_at, name, email)	default(id)
-//	@Param			sort_by		query		string																			false	"Sort by"	Enums(asc, desc)					default(asc)
+//	@Param			order_by	query		string																			false	"Order by"	Enums(id, assigned_date, name, email)	default(id)
+//	@Param			sort_by		query		string																			false	"Sort by"	Enums(asc, desc)						default(asc)
 //	@Success		200			{object}	response.BasePaginationSwaggerResponse{data=[]response.ListTenantUserResponse}	"List fetched successfully. Available code (LIST_FETCHED)"
 //	@Failure		400			{object}	response.BaseSwaggerValidationResponse{}										"Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)"
 //	@Failure		401			{object}	response.BaseSwaggerEmptyResponse{}												"Unauthorized. Available code (UNAUTHORIZED)"
@@ -64,12 +64,12 @@ func (h userTenantHandler) ListTenantUsers(c fiber.Ctx) error {
 		helper.QueryField(&req.Pagination, pagination.Parse()),
 		helper.QueryField(&req.Order, sorting.Parse(
 			sorting.WithDefaults("id", entity.Asc),
-			sorting.WithAllowedOrderBy("id", "created_at", "name", "email"),
+			sorting.WithAllowedOrderBy("id", "assigned_date", "name", "email"),
 			sorting.WithMappingOrderBy(map[string]string{
-				"id":         "id",
-				"created_at": "created_at",
-				"name":       "name",
-				"email":      "email",
+				"id":            "u.id",
+				"assigned_date": "fut.created_at",
+				"name":          "u.name",
+				"email":         "u.email",
 			}),
 		)),
 	)

@@ -1457,7 +1457,7 @@ paths:
         description: Order by
         enum:
         - id
-        - created_at
+        - assigned_date
         - name
         - email
         in: query
