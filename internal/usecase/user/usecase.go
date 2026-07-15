@@ -17,6 +17,7 @@ type UserUseCase interface {
 	Update(ctx context.Context, user entity.User) error
 	UpdateStatus(ctx context.Context, id uuid.UUID, status entity.UserStatus) error
 	Dropdown(ctx context.Context, filter entity.DropdownFilter) ([]entity.DropdownItem, uint64, error)
+	SelectedDropdown(ctx context.Context, selectedIds []uuid.UUID) ([]entity.DropdownItem, error)
 }
 
 type userUseCase struct {

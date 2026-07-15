@@ -32,9 +32,8 @@ func (r *router) Register(app *fiber.App) {
 	app.Get("/health", r.health.Check)
 
 	r.authRoute(app.Group("/auth"))
-	r.dropdownRoute(app)
-	r.userRoute(app.Group("/user"))
 	r.userMeRoute(app.Group("/user/me"))
+	r.userRoute(app.Group("/user"))
 	r.roleRoute(app.Group("/role"))
 	r.tenantRoute(app.Group("/tenant"))
 	r.permissionRoute(app.Group("/permission"))
@@ -53,6 +52,8 @@ func (r *router) authRoute(route fiber.Router) {
 
 func (r *router) userRoute(route fiber.Router) {
 	route.Get("/", r.mid.Auth(), r.user.List)
+	route.Get("/dropdown", r.mid.Auth(), r.user.Dropdown)
+	route.Get("/dropdown/selected", r.mid.Auth(), r.user.SelectedDropdown)
 	route.Get("/:id", r.mid.Auth(), r.user.Detail)
 	route.Get("/:id/tenants", r.mid.Auth(), r.userTenant.ListUserTenants)
 	route.Post("/", r.mid.Auth(), r.user.Create)
@@ -66,6 +67,8 @@ func (r *router) userMeRoute(route fiber.Router) {
 
 func (r *router) roleRoute(route fiber.Router) {
 	route.Get("", r.mid.Auth(), r.role.List)
+	route.Get("/dropdown", r.mid.Auth(), r.role.Dropdown)
+	route.Get("/dropdown/selected", r.mid.Auth(), r.role.SelectedDropdown)
 	route.Get("/:id", r.mid.Auth(), r.role.Detail)
 	route.Post("", r.mid.Auth(), r.role.Create)
 	route.Put("/:id", r.mid.Auth(), r.role.Update)
@@ -74,6 +77,8 @@ func (r *router) roleRoute(route fiber.Router) {
 
 func (r *router) tenantRoute(route fiber.Router) {
 	route.Get("/", r.mid.Auth(), r.tenant.List)
+	route.Get("/dropdown", r.mid.Auth(), r.tenant.Dropdown)
+	route.Get("/dropdown/selected", r.mid.Auth(), r.tenant.SelectedDropdown)
 	route.Get("/:id", r.mid.Auth(), r.tenant.Detail)
 	route.Get("/:id/users", r.mid.Auth(), r.userTenant.ListTenantUsers)
 	route.Post("/", r.mid.Auth(), r.tenant.Create)
@@ -89,10 +94,4 @@ func (r *router) permissionRoute(route fiber.Router) {
 
 func (r *router) storageRoute(route fiber.Router) {
 	route.Post("/presigned-upload", r.mid.Auth(), r.storage.PresignedUpload)
-}
-
-func (r *router) dropdownRoute(route fiber.Router) {
-	route.Get("/user/dropdown", r.mid.Auth(), r.user.Dropdown)
-	route.Get("/role/dropdown", r.mid.Auth(), r.role.Dropdown)
-	route.Get("/tenant/dropdown", r.mid.Auth(), r.tenant.Dropdown)
 }

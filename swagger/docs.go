@@ -551,13 +551,74 @@ const docTemplate = `{
                         "description": "Items per page",
                         "name": "page_size",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Roles fetched successfully. Available code (LIST_FETCHED)",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BasePaginationSwaggerResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.DropdownResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
+                    "400": {
+                        "description": "Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/role/dropdown/selected": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Get selected role dropdown items",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Role"
+                ],
+                "summary": "Role Selected Dropdown",
+                "operationId": "role-selected-dropdown",
+                "parameters": [
                     {
                         "type": "array",
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
+                        "collectionFormat": "multi",
                         "description": "Active IDs",
                         "name": "active_ids",
                         "in": "query"
@@ -569,7 +630,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/response.BasePaginationSwaggerResponse"
+                                    "$ref": "#/definitions/response.BaseSwaggerResponse"
                                 },
                                 {
                                     "type": "object",
@@ -1087,13 +1148,74 @@ const docTemplate = `{
                         "description": "Items per page",
                         "name": "page_size",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tenants fetched successfully. Available code (LIST_FETCHED)",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BasePaginationSwaggerResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.DropdownResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
+                    "400": {
+                        "description": "Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tenant/dropdown/selected": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Get selected tenant dropdown items",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tenant"
+                ],
+                "summary": "Tenant Selected Dropdown",
+                "operationId": "tenant-selected-dropdown",
+                "parameters": [
                     {
                         "type": "array",
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
+                        "collectionFormat": "multi",
                         "description": "Active IDs",
                         "name": "active_ids",
                         "in": "query"
@@ -1105,7 +1227,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/response.BasePaginationSwaggerResponse"
+                                    "$ref": "#/definitions/response.BaseSwaggerResponse"
                                 },
                                 {
                                     "type": "object",
@@ -1803,13 +1925,74 @@ const docTemplate = `{
                         "description": "Items per page",
                         "name": "page_size",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Users fetched successfully. Available code (LIST_FETCHED)",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BasePaginationSwaggerResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.DropdownResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
+                    "400": {
+                        "description": "Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerValidationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Available code (UNAUTHORIZED)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. Available code (INTERNAL_SERVER_ERROR)",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSwaggerEmptyResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/dropdown/selected": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAccessToken": []
+                    }
+                ],
+                "description": "Get selected user dropdown items",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "User Selected Dropdown",
+                "operationId": "user-selected-dropdown",
+                "parameters": [
                     {
                         "type": "array",
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
+                        "collectionFormat": "multi",
                         "description": "Active IDs",
                         "name": "active_ids",
                         "in": "query"
@@ -1821,7 +2004,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/response.BasePaginationSwaggerResponse"
+                                    "$ref": "#/definitions/response.BaseSwaggerResponse"
                                 },
                                 {
                                     "type": "object",

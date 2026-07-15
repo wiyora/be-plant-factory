@@ -23,6 +23,7 @@ type RoleRepository interface {
 	Update(ctx context.Context, role entity.Role) (bool, error)
 	Delete(ctx context.Context, id uuid.UUID) (bool, error)
 	Dropdown(ctx context.Context, req entity.DropdownFilter) ([]DropdownRole, uint64, error)
+	SelectedDropdown(ctx context.Context, selectedIds []uuid.UUID) ([]DropdownRole, error)
 }
 
 type roleRepository struct {
@@ -185,12 +186,7 @@ func (r roleRepository) Delete(ctx context.Context, id uuid.UUID) (bool, error) 
 }
 
 func (r roleRepository) dropdownFilters(query pgq.SelectBuilder, req entity.DropdownFilter) pgq.SelectBuilder {
-	hasActiveIDs := len(req.ActiveIDs) > 0
-	hasSearch := req.Search.HasSearch()
-
-	if hasActiveIDs && hasSearch {
-		query = query.Where("id = ANY(?) OR name % ?", req.ActiveIDs, req.Search)
-	} else if hasSearch {
+	if req.Search.HasSearch() {
 		query = query.Where("name % ?", req.Search)
 	}
 
@@ -198,24 +194,12 @@ func (r roleRepository) dropdownFilters(query pgq.SelectBuilder, req entity.Drop
 }
 
 func (r roleRepository) dropdownOrderBy(query pgq.SelectBuilder, req entity.DropdownFilter) pgq.SelectBuilder {
-	hasActiveIDs := len(req.ActiveIDs) > 0
-	hasSearch := req.Search.HasSearch()
-
-	if hasActiveIDs && hasSearch {
-		return query.OrderByClause("CASE WHEN id = ANY(?) THEN 0 ELSE 1 END, similarity(name, ?) DESC, name ASC", req.ActiveIDs, req.Search)
-	}
-
-	if hasActiveIDs {
-		return query.OrderByClause("CASE WHEN id = ANY(?) THEN 0 ELSE 1 END, name ASC", req.ActiveIDs)
-	}
-
-	if hasSearch {
+	if req.Search.HasSearch() {
 		return query.OrderByClause("similarity(name, ?) DESC, name ASC", req.Search)
 	}
 
 	return query.OrderBy("name ASC")
 }
-
 func (r roleRepository) Dropdown(ctx context.Context, req entity.DropdownFilter) ([]DropdownRole, uint64, error) {
 	log := logger.WithLayerCtx(ctx, logger.LayerPostgresRepository)
 
@@ -263,4 +247,36 @@ func (r roleRepository) Dropdown(ctx context.Context, req entity.DropdownFilter)
 	}
 
 	return items, total, nil
+}
+
+func (r roleRepository) SelectedDropdown(ctx context.Context, selectedIds []uuid.UUID) ([]DropdownRole, error) {
+	log := logger.WithLayerCtx(ctx, logger.LayerPostgresRepository)
+
+	query := pgq.Select("id", "name").From("roles").Where("id = ANY(?)", selectedIds)
+
+	sql, args, err := query.SQL()
+	if err != nil {
+		log.Error().Err(err).Msg("failed to build role selected dropdown query")
+		return nil, err
+	}
+
+	db := GetDB(ctx, r.db)
+	rows, err := db.Query(ctx, sql, args...)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to execute role selected dropdown query")
+		return nil, err
+	}
+	defer rows.Close()
+
+	items, err := pgx.CollectRows(rows, pgx.RowToStructByName[DropdownRole])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+
+		log.Error().Err(err).Msg("failed to scan role selected dropdown rows")
+		return nil, err
+	}
+
+	return items, nil
 }

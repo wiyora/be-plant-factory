@@ -69,14 +69,12 @@ func (d DateRange) IsEmpty() bool {
 	return d.Start.IsZero() && d.End.IsZero()
 }
 
-// DropdownFilter
+// Dropdown
 type DropdownFilter struct {
 	Search     Search
 	Pagination Pagination
-	ActiveIDs  []uuid.UUID
 }
 
-// DropdownItem
 type DropdownItem struct {
 	ID   uuid.UUID
 	Name string

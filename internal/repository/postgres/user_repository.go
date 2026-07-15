@@ -25,6 +25,7 @@ type UserRepository interface {
 	Update(ctx context.Context, user entity.User) (bool, error)
 	UpdateStatus(ctx context.Context, id uuid.UUID, status entity.UserStatus) (bool, error)
 	Dropdown(ctx context.Context, req entity.DropdownFilter) ([]DropdownUser, uint64, error)
+	SelectedDropdown(ctx context.Context, selectedIds []uuid.UUID) ([]DropdownUser, error)
 }
 
 type userRepository struct {
@@ -240,12 +241,7 @@ func (r userRepository) UpdateStatus(ctx context.Context, id uuid.UUID, status e
 }
 
 func (r userRepository) dropdownFilters(query pgq.SelectBuilder, req entity.DropdownFilter) pgq.SelectBuilder {
-	hasActiveIDs := len(req.ActiveIDs) > 0
-	hasSearch := req.Search.HasSearch()
-
-	if hasActiveIDs && hasSearch {
-		query = query.Where("id = ANY(?) OR name % ?", req.ActiveIDs, req.Search)
-	} else if hasSearch {
+	if req.Search.HasSearch() {
 		query = query.Where("name % ?", req.Search)
 	}
 
@@ -253,18 +249,7 @@ func (r userRepository) dropdownFilters(query pgq.SelectBuilder, req entity.Drop
 }
 
 func (r userRepository) dropdownOrderBy(query pgq.SelectBuilder, req entity.DropdownFilter) pgq.SelectBuilder {
-	hasActiveIDs := len(req.ActiveIDs) > 0
-	hasSearch := req.Search.HasSearch()
-
-	if hasActiveIDs && hasSearch {
-		return query.OrderByClause("CASE WHEN id = ANY(?) THEN 0 ELSE 1 END, similarity(name, ?) DESC, name ASC", req.ActiveIDs, req.Search)
-	}
-
-	if hasActiveIDs {
-		return query.OrderByClause("CASE WHEN id = ANY(?) THEN 0 ELSE 1 END, name ASC", req.ActiveIDs)
-	}
-
-	if hasSearch {
+	if req.Search.HasSearch() {
 		return query.OrderByClause("similarity(name, ?) DESC, name ASC", req.Search)
 	}
 
@@ -279,14 +264,14 @@ func (r userRepository) Dropdown(ctx context.Context, req entity.DropdownFilter)
 
 	countSQL, countArgs, err := countQuery.SQL()
 	if err != nil {
-		log.Error().Err(err).Msg("failed to build role dropdown count query")
+		log.Error().Err(err).Msg("failed to build user dropdown count query")
 		return nil, 0, err
 	}
 
 	var total uint64
 	db := GetDB(ctx, r.db)
 	if err := db.QueryRow(ctx, countSQL, countArgs...).Scan(&total); err != nil {
-		log.Error().Err(err).Msg("failed to execute role dropdown count query")
+		log.Error().Err(err).Msg("failed to execute user dropdown count query")
 		return nil, 0, err
 	}
 
@@ -297,13 +282,13 @@ func (r userRepository) Dropdown(ctx context.Context, req entity.DropdownFilter)
 
 	sql, args, err := query.SQL()
 	if err != nil {
-		log.Error().Err(err).Msg("failed to build role dropdown query")
+		log.Error().Err(err).Msg("failed to build user dropdown query")
 		return nil, 0, err
 	}
 
 	rows, err := db.Query(ctx, sql, args...)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to execute role dropdown query")
+		log.Error().Err(err).Msg("failed to execute user dropdown query")
 		return nil, 0, err
 	}
 	defer rows.Close()
@@ -313,9 +298,41 @@ func (r userRepository) Dropdown(ctx context.Context, req entity.DropdownFilter)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, total, nil
 		}
-		log.Error().Err(err).Msg("failed to scan role dropdown rows")
+		log.Error().Err(err).Msg("failed to scan user dropdown rows")
 		return nil, 0, err
 	}
 
 	return items, total, nil
+}
+
+func (r userRepository) SelectedDropdown(ctx context.Context, selectedIds []uuid.UUID) ([]DropdownUser, error) {
+	log := logger.WithLayerCtx(ctx, logger.LayerPostgresRepository)
+
+	query := pgq.Select("id", "name").From("users").Where("id = ANY(?)", selectedIds)
+
+	sql, args, err := query.SQL()
+	if err != nil {
+		log.Error().Err(err).Msg("failed to build user selected dropdown query")
+		return nil, err
+	}
+
+	db := GetDB(ctx, r.db)
+	rows, err := db.Query(ctx, sql, args...)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to execute user selected dropdown query")
+		return nil, err
+	}
+	defer rows.Close()
+
+	items, err := pgx.CollectRows(rows, pgx.RowToStructByName[DropdownUser])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+
+		log.Error().Err(err).Msg("failed to scan user selected dropdown rows")
+		return nil, err
+	}
+
+	return items, nil
 }

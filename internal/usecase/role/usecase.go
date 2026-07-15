@@ -17,6 +17,7 @@ type RoleUseCase interface {
 	Delete(ctx context.Context, id uuid.UUID) error
 	GetAllPermissions(ctx context.Context) []entity.PermissionModule
 	Dropdown(ctx context.Context, filter entity.DropdownFilter) ([]entity.DropdownItem, uint64, error)
+	SelectedDropdown(ctx context.Context, selectedIds []uuid.UUID) ([]entity.DropdownItem, error)
 }
 
 type roleUseCase struct {

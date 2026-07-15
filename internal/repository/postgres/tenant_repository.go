@@ -23,6 +23,7 @@ type TenantRepository interface {
 	Update(ctx context.Context, tenant entity.Tenant) (bool, error)
 	UpdateStatus(ctx context.Context, id uuid.UUID, status entity.TenantStatus) (bool, error)
 	Dropdown(ctx context.Context, req entity.DropdownFilter) ([]DropdownTenant, uint64, error)
+	SelectedDropdown(ctx context.Context, selectedIds []uuid.UUID) ([]DropdownTenant, error)
 }
 
 type tenantRepository struct {
@@ -188,12 +189,7 @@ func (r tenantRepository) UpdateStatus(ctx context.Context, id uuid.UUID, status
 }
 
 func (r tenantRepository) dropdownFilters(query pgq.SelectBuilder, req entity.DropdownFilter) pgq.SelectBuilder {
-	hasActiveIDs := len(req.ActiveIDs) > 0
-	hasSearch := req.Search.HasSearch()
-
-	if hasActiveIDs && hasSearch {
-		query = query.Where("id = ANY(?) OR name % ?", req.ActiveIDs, req.Search)
-	} else if hasSearch {
+	if req.Search.HasSearch() {
 		query = query.Where("name % ?", req.Search)
 	}
 
@@ -201,18 +197,7 @@ func (r tenantRepository) dropdownFilters(query pgq.SelectBuilder, req entity.Dr
 }
 
 func (r tenantRepository) dropdownOrderBy(query pgq.SelectBuilder, req entity.DropdownFilter) pgq.SelectBuilder {
-	hasActiveIDs := len(req.ActiveIDs) > 0
-	hasSearch := req.Search.HasSearch()
-
-	if hasActiveIDs && hasSearch {
-		return query.OrderByClause("CASE WHEN id = ANY(?) THEN 0 ELSE 1 END, similarity(name, ?) DESC, name ASC", req.ActiveIDs, req.Search)
-	}
-
-	if hasActiveIDs {
-		return query.OrderByClause("CASE WHEN id = ANY(?) THEN 0 ELSE 1 END, name ASC", req.ActiveIDs)
-	}
-
-	if hasSearch {
+	if req.Search.HasSearch() {
 		return query.OrderByClause("similarity(name, ?) DESC, name ASC", req.Search)
 	}
 
@@ -227,14 +212,14 @@ func (r tenantRepository) Dropdown(ctx context.Context, req entity.DropdownFilte
 
 	countSQL, countArgs, err := countQuery.SQL()
 	if err != nil {
-		log.Error().Err(err).Msg("failed to build role dropdown count query")
+		log.Error().Err(err).Msg("failed to build tenant dropdown count query")
 		return nil, 0, err
 	}
 
 	var total uint64
 	db := GetDB(ctx, r.db)
 	if err := db.QueryRow(ctx, countSQL, countArgs...).Scan(&total); err != nil {
-		log.Error().Err(err).Msg("failed to execute role dropdown count query")
+		log.Error().Err(err).Msg("failed to execute tenant dropdown count query")
 		return nil, 0, err
 	}
 
@@ -245,13 +230,13 @@ func (r tenantRepository) Dropdown(ctx context.Context, req entity.DropdownFilte
 
 	sql, args, err := query.SQL()
 	if err != nil {
-		log.Error().Err(err).Msg("failed to build role dropdown query")
+		log.Error().Err(err).Msg("failed to build tenant dropdown query")
 		return nil, 0, err
 	}
 
 	rows, err := db.Query(ctx, sql, args...)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to execute role dropdown query")
+		log.Error().Err(err).Msg("failed to execute tenant dropdown query")
 		return nil, 0, err
 	}
 	defer rows.Close()
@@ -261,9 +246,41 @@ func (r tenantRepository) Dropdown(ctx context.Context, req entity.DropdownFilte
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, total, nil
 		}
-		log.Error().Err(err).Msg("failed to scan role dropdown rows")
+		log.Error().Err(err).Msg("failed to scan tenant dropdown rows")
 		return nil, 0, err
 	}
 
 	return items, total, nil
+}
+
+func (r tenantRepository) SelectedDropdown(ctx context.Context, selectedIds []uuid.UUID) ([]DropdownTenant, error) {
+	log := logger.WithLayerCtx(ctx, logger.LayerPostgresRepository)
+
+	query := pgq.Select("id", "name").From("tenants").Where("id = ANY(?)", selectedIds)
+
+	sql, args, err := query.SQL()
+	if err != nil {
+		log.Error().Err(err).Msg("failed to build tenant selected dropdown query")
+		return nil, err
+	}
+
+	db := GetDB(ctx, r.db)
+	rows, err := db.Query(ctx, sql, args...)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to execute tenant selected dropdown query")
+		return nil, err
+	}
+	defer rows.Close()
+
+	items, err := pgx.CollectRows(rows, pgx.RowToStructByName[DropdownTenant])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+
+		log.Error().Err(err).Msg("failed to scan tenant selected dropdown rows")
+		return nil, err
+	}
+
+	return items, nil
 }

@@ -1057,13 +1057,6 @@ paths:
         in: query
         name: page_size
         type: integer
-      - collectionFormat: csv
-        description: Active IDs
-        in: query
-        items:
-          type: string
-        name: active_ids
-        type: array
       produces:
       - application/json
       responses:
@@ -1093,6 +1086,49 @@ paths:
       security:
       - CookieAccessToken: []
       summary: Role Dropdown
+      tags:
+      - Role
+  /role/dropdown/selected:
+    get:
+      description: Get selected role dropdown items
+      operationId: role-selected-dropdown
+      parameters:
+      - collectionFormat: multi
+        description: Active IDs
+        in: query
+        items:
+          type: string
+        name: active_ids
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Roles fetched successfully. Available code (LIST_FETCHED)
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseSwaggerResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.DropdownResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerValidationResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Role Selected Dropdown
       tags:
       - Role
   /storage/presigned-upload:
@@ -1570,13 +1606,6 @@ paths:
         in: query
         name: page_size
         type: integer
-      - collectionFormat: csv
-        description: Active IDs
-        in: query
-        items:
-          type: string
-        name: active_ids
-        type: array
       produces:
       - application/json
       responses:
@@ -1606,6 +1635,49 @@ paths:
       security:
       - CookieAccessToken: []
       summary: Tenant Dropdown
+      tags:
+      - Tenant
+  /tenant/dropdown/selected:
+    get:
+      description: Get selected tenant dropdown items
+      operationId: tenant-selected-dropdown
+      parameters:
+      - collectionFormat: multi
+        description: Active IDs
+        in: query
+        items:
+          type: string
+        name: active_ids
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tenants fetched successfully. Available code (LIST_FETCHED)
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseSwaggerResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.DropdownResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerValidationResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: Tenant Selected Dropdown
       tags:
       - Tenant
   /user:
@@ -1959,13 +2031,6 @@ paths:
         in: query
         name: page_size
         type: integer
-      - collectionFormat: csv
-        description: Active IDs
-        in: query
-        items:
-          type: string
-        name: active_ids
-        type: array
       produces:
       - application/json
       responses:
@@ -1995,6 +2060,49 @@ paths:
       security:
       - CookieAccessToken: []
       summary: User Dropdown
+      tags:
+      - User
+  /user/dropdown/selected:
+    get:
+      description: Get selected user dropdown items
+      operationId: user-selected-dropdown
+      parameters:
+      - collectionFormat: multi
+        description: Active IDs
+        in: query
+        items:
+          type: string
+        name: active_ids
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Users fetched successfully. Available code (LIST_FETCHED)
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseSwaggerResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.DropdownResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request. Available code (VALIDATION_ERROR, BAD_REQUEST)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerValidationResponse'
+        "401":
+          description: Unauthorized. Available code (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+        "500":
+          description: Internal Server Error. Available code (INTERNAL_SERVER_ERROR)
+          schema:
+            $ref: '#/definitions/response.BaseSwaggerEmptyResponse'
+      security:
+      - CookieAccessToken: []
+      summary: User Selected Dropdown
       tags:
       - User
   /user/me/getting-started:
